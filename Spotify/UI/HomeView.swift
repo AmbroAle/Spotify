@@ -5,10 +5,16 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 0) {
                 TopBarView(selectedTab: $selectedTab)
-                AlbumCarouselView()
-                Spacer()
+                ScrollView {
+                    VStack(spacing: 24) {
+                        TrackCarouselView()
+                        AlbumCarouselView()
+                    }
+                    .padding(.bottom, 16)
+                }
+
                 BottomMenuView()
             }
         }
