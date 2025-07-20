@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authVM = AuthViewModel()
+    @StateObject private var authVM = AppViewModel()
     @State private var email = ""
     @State private var password = ""
     @State private var isRegistering = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .top) {
                 VStack(spacing: 20) {
                     
@@ -76,6 +76,10 @@ struct LoginView: View {
                         .transition(.opacity)
                         .animation(.easeInOut, value: authVM.isRegistered)
                 }
+                
+            }
+            .navigationDestination(isPresented: $authVM.isAuthenticated) {
+                    HomeView()
             }
         }
     }

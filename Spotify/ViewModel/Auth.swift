@@ -2,7 +2,7 @@
 import Foundation
 import FirebaseAuth
 
-class AuthViewModel: ObservableObject {
+class AppViewModel: ObservableObject {
     @Published var isAuthenticated = false
     @Published var errorMessage: String?
     @Published var isRegistered = false
