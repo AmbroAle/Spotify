@@ -5,12 +5,29 @@ struct ArtistDetailView: View {
     @StateObject private var viewModel = ArtistAlbumViewModel()
 
     var body: some View {
-        NavigationStack() {
-            VStack {
-                Text(artist.name)
-                    .font(.largeTitle)
-                    .padding()
-                
+        NavigationStack {
+            VStack(spacing: 0) {
+        
+                ZStack(alignment: .bottomLeading) {
+                    AsyncImage(url: URL(string: artist.picture_big)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 250, alignment: .top)
+                            .clipped()
+                    } placeholder: {
+                        Color.gray.opacity(0.2)
+                            .frame(height: 220)
+                    }
+
+                    Text(artist.name)
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.white)
+                        .shadow(radius: 5)
+                        .padding()
+                }
+
                 if !viewModel.genres.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Generi")
@@ -28,7 +45,7 @@ struct ArtistDetailView: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
+                    .padding()
                 }
 
                 List(viewModel.albums) { album in
@@ -44,7 +61,6 @@ struct ArtistDetailView: View {
                         VStack(alignment: .leading) {
                             Text(album.title)
                                 .font(.headline)
-
                             Text("Uscita: \(album.release_date)")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
@@ -53,6 +69,7 @@ struct ArtistDetailView: View {
                 }
             }
             .navigationTitle("Album di \(artist.name)")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 Task {
                     await viewModel.fetchAlbums(for: artist.id)
@@ -61,7 +78,5 @@ struct ArtistDetailView: View {
             }
             BottomMenuView()
         }
-        
     }
 }
-
