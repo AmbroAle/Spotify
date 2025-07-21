@@ -33,7 +33,7 @@ struct ArtistDetailView: View {
                         Text("Generi")
                             .font(.headline)
 
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 4)], spacing: 8) {
                             ForEach(viewModel.genres, id: \.self) { genre in
                                 Text(genre)
                                     .font(.caption)
