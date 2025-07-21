@@ -14,7 +14,7 @@ class AlbumViewModel: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            let decoded = try JSONDecoder().decode(DeezerResponse.self, from: data)
+            let decoded = try JSONDecoder().decode(DeezerResponse<Album>.self, from: data)
             await MainActor.run {
                 self.albums = decoded.data
             }

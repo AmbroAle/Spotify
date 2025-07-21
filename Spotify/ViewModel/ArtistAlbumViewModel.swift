@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 class ArtistAlbumViewModel: ObservableObject {
-    @Published var albums: [Album] = []
+    @Published var albums: [DetailsAlbumArtist] = []
 
     func fetchAlbums(for artistID: Int) async {
         let urlString = "https://api.deezer.com/artist/\(artistID)/albums"
@@ -13,7 +13,7 @@ class ArtistAlbumViewModel: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            let decoded = try JSONDecoder().decode(DeezerResponse.self, from: data)
+            let decoded = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
             self.albums = decoded.data
         } catch {
             print("Errore nel caricamento degli album: \(error.localizedDescription)")

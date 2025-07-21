@@ -13,10 +13,18 @@ struct Album: Codable, Identifiable {
     let artist: AlbumArtist
 }
 
+
 struct AlbumArtist: Codable {
     let name: String
 }
 
-struct DeezerResponse: Codable {
-    let data: [Album]
+struct DetailsAlbumArtist : Codable, Identifiable {
+    let id: Int
+    let title: String
+    let cover_medium: String
+    let release_date: String
+}
+
+struct DeezerResponse<T: Codable>: Codable {
+    let data: [T]
 }

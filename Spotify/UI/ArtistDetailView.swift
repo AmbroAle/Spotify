@@ -20,8 +20,14 @@ struct ArtistDetailView: View {
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                    Text(album.title)
-                        .font(.headline)
+                    VStack(alignment: .leading) {
+                        Text(album.title)
+                            .font(.headline)
+
+                        Text("Uscita: \(album.release_date)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
         }
@@ -33,3 +39,4 @@ struct ArtistDetailView: View {
         }
     }
 }
+
