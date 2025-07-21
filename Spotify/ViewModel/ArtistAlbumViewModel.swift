@@ -16,15 +16,14 @@ class ArtistAlbumViewModel: ObservableObject {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
             
-            let sortedAlbums = decoded.data.sorted {
-                $0.release_date > $1.release_date
-            }
+            let groupedByTitle = Dictionary(grouping: decoded.data, by: \.title)
+            let uniqueAlbums = groupedByTitle.compactMap { $0.value.max(by: { $0.release_date < $1.release_date }) }
             
-            self.albums = sortedAlbums
+            self.albums = uniqueAlbums.sorted { $0.release_date > $1.release_date }
+            
         } catch {
             print("Errore nel caricamento degli album: \(error.localizedDescription)")
         }
-        
     }
     
     func fetchGenres(for artistName: String) async {
