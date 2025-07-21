@@ -7,7 +7,6 @@
 import SwiftUI
 
 struct TopBarView: View {
-    @Binding var selectedTab: String
 
     var body: some View {
         HStack(spacing: 24) {
@@ -34,7 +33,6 @@ struct TopBarView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
-                    .onTapGesture { selectedTab = "album" }
                 Text("Album").font(.caption)
             }
 

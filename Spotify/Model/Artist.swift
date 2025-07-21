@@ -12,3 +12,16 @@ struct Artist: Identifiable, Codable {
     let name: String
     let picture_medium: String
 }
+
+struct TopTagsResponse: Codable {
+    let toptags: TopTags
+}
+
+struct TopTags: Codable {
+    let tag: [GenreTag]
+}
+
+struct GenreTag: Codable {
+    let name: String
+    let count: Int
+}
