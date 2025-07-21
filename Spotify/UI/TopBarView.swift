@@ -18,13 +18,15 @@ struct TopBarView: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.black, lineWidth: 2))
 
-            VStack {
-                Image(systemName: "music.mic")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .onTapGesture { selectedTab = "artist" }
-                Text("Artisti").font(.caption)
+            NavigationLink(destination: ArtistView()) {
+                VStack {
+                    Image(systemName: "music.mic")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                    Text("Artisti")
+                        .font(.caption)
+                }
             }
 
             VStack {

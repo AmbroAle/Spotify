@@ -10,10 +10,10 @@ struct Album: Codable, Identifiable {
     let title: String
     let release_date: String
     let cover_medium: String
-    let artist: Artist
+    let artist: AlbumArtist
 }
 
-struct Artist: Codable {
+struct AlbumArtist: Codable {
     let name: String
 }
 
