@@ -3,6 +3,7 @@ import SwiftUI
 struct ArtistDetailView: View {
     let artist: Artist
     @StateObject private var viewModel = ArtistAlbumViewModel()
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -33,7 +34,7 @@ struct ArtistDetailView: View {
                         Text("Generi")
                             .font(.headline)
 
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 4)], spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
                             ForEach(viewModel.genres, id: \.self) { genre in
                                 Text(genre)
                                     .font(.caption)
@@ -70,6 +71,17 @@ struct ArtistDetailView: View {
             }
             .navigationTitle("Album di \(artist.name)")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
             .onAppear {
                 Task {
                     await viewModel.fetchAlbums(for: artist.id)

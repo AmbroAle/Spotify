@@ -35,7 +35,15 @@ class ArtistAlbumViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode(TopTagsResponse.self, from: data)
-            self.genres = decoded.toptags.tag.prefix(5).map { $0.name.capitalized }
+            let knownGenres = ["rock", "pop", "hip hop", "rap", "jazz", "electronic", "reggae", "metal", "indie", "classical", "techno", "funk", "soul"]
+
+            let filtered = decoded.toptags.tag
+                .map { $0.name.lowercased() }
+                .filter { knownGenres.contains($0) }
+                .prefix(5)
+                .map { $0.capitalized }
+
+            self.genres = Array(filtered)
         } catch {
             print("Errore nel caricamento dei generi: \(error)")
         }
