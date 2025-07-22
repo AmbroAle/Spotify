@@ -22,6 +22,7 @@ struct DetailsAlbumArtist : Codable, Identifiable {
     let id: Int
     let title: String
     let cover_medium: String
+    let cover_xl : String
     let release_date: String
 }
 

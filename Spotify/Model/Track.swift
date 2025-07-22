@@ -1,10 +1,3 @@
-//
-//  Track.swift
-//  Spotify
-//
-//  Created by Alessandro Ambrogiani on 20/07/25.
-//
-
 import Foundation
 
 struct Track: Identifiable, Codable {
@@ -17,6 +10,13 @@ struct Track: Identifiable, Codable {
 
 struct TrackAlbum: Codable {
     let cover_medium: String
+    let title: String
+}
+
+struct TrackAlbumDetail : Codable , Identifiable{
+    let id: Int
+    let title: String
+    let preview: String
 }
 
 struct DeezerTrackResponse: Codable {
