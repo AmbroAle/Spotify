@@ -1,28 +1,50 @@
 import Foundation
+import AVFoundation
 
 @MainActor
 class AlbumDetailViewModel: ObservableObject {
     @Published var tracks: [TrackAlbumDetail] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String? = nil
+    @Published var likedTracks: Set<Int> = []
+    @Published var currentlyPlayingTrackID: Int?
+
+    private var audioPlayer: AVPlayer?
 
     func fetchTracks(for albumID: Int) async {
-        isLoading = true
-        errorMessage = nil
         let urlString = "https://api.deezer.com/album/\(albumID)/tracks"
-        guard let url = URL(string: urlString) else {
-            errorMessage = "URL non valido"
-            isLoading = false
-            return
-        }
+        guard let url = URL(string: urlString) else { return }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode(DeezerResponse<TrackAlbumDetail>.self, from: data)
-            tracks = decoded.data
+            self.tracks = decoded.data
         } catch {
-            errorMessage = "Errore nel caricamento delle tracce: \(error.localizedDescription)"
+            print("Errore nel caricamento delle tracce: \(error)")
         }
-        isLoading = false
+    }
+
+    func toggleLike(for trackID: Int) {
+        if likedTracks.contains(trackID) {
+            likedTracks.remove(trackID)
+        } else {
+            likedTracks.insert(trackID)
+        }
+    }
+
+    func playOrPause(track: TrackAlbumDetail) {
+        if currentlyPlayingTrackID == track.id {
+            audioPlayer?.pause()
+            currentlyPlayingTrackID = nil
+        } else {
+            if let url = URL(string: track.preview) {
+                audioPlayer = AVPlayer(url: url)
+                audioPlayer?.play()
+                currentlyPlayingTrackID = track.id
+            }
+        }
+    }
+
+    func stopPlayback() {
+        audioPlayer?.pause()
+        currentlyPlayingTrackID = nil
     }
 }
