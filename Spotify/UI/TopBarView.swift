@@ -1,9 +1,3 @@
-//
-//  TopBarView.swift
-//  Spotify
-//
-//  Created by Alessandro Ambrogiani on 20/07/25.
-//
 import SwiftUI
 
 struct TopBarView: View {
@@ -19,21 +13,40 @@ struct TopBarView: View {
 
             NavigationLink(destination: ArtistView()) {
                 VStack {
-                    Image(systemName: "music.mic")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
+                    ZStack {
+                        Circle()
+                            .fill(Color.black.opacity(0.15))
+                            .frame(width: 60, height: 60)
+                        Image(systemName: "music.mic")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                            .foregroundColor(.black)
+                    }
+                    .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 2)
+
                     Text("Artisti")
                         .font(.caption)
+                        .foregroundColor(.black)
                 }
             }
 
             VStack {
-                Image(systemName: "square.stack")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                Text("Album").font(.caption)
+                ZStack {
+                    Circle()
+                        .fill(Color.black.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    Image(systemName: "square.stack")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .foregroundColor(.black)
+                }
+                .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 2)
+
+                Text("Album")
+                    .font(.caption)
+                    .foregroundColor(.black)
             }
 
             Spacer()

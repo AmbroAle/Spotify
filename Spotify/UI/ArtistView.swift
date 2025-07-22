@@ -2,7 +2,8 @@ import SwiftUI
 
 struct ArtistView: View {
     @StateObject private var viewModel = ArtistViewModel()
-
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         NavigationStack(){
             VStack {
@@ -35,6 +36,17 @@ struct ArtistView: View {
                 }
             }
             .navigationTitle("Artisti")
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
             BottomMenuView()
         }
     }
