@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 class AlbumViewModel: ObservableObject {
     @Published var albumsPopularity: [Album] = []
     @Published var albums: [DetailsAlbumArtist] = []
@@ -10,6 +11,7 @@ class AlbumViewModel: ObservableObject {
     init() {
         Task {
             await fetchGenres()
+            await fetchNewReleases()
         }
     }
 
@@ -39,25 +41,27 @@ class AlbumViewModel: ObservableObject {
     }
 
     func fetchAlbumsByGenre(genreID: Int) async {
-        guard let url = URL(string: "\(baseURL)/genre/\(genreID)/artists") else { return }
+            guard let url = URL(string: "\(baseURL)/genre/\(genreID)/artists") else { return }
 
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let result = try JSONDecoder().decode(DeezerResponse<Artist>.self, from: data)
-            let artists = result.data.prefix(5)
-
-            var loadedAlbums: [DetailsAlbumArtist] = []
-            for artist in artists {
-                guard let url = URL(string: "\(baseURL)/artist/\(artist.id)/albums") else { continue }
+            do {
                 let (data, _) = try await URLSession.shared.data(from: url)
-                let albumResponse = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
-                loadedAlbums += albumResponse.data
-            }
+                let result = try JSONDecoder().decode(DeezerResponse<Artist>.self, from: data)
+                let artists = result.data.prefix(5)
 
-            self.albums = loadedAlbums
-        } catch {
-            print("Errore caricamento album per genere: \(error)")
+                var loadedAlbums: [DetailsAlbumArtist] = []
+
+                for artist in artists {
+                    guard let url = URL(string: "\(baseURL)/artist/\(artist.id)/albums") else { continue }
+                    let (data, _) = try await URLSession.shared.data(from: url)
+                    let albumResponse = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
+                    loadedAlbums += albumResponse.data
+                    if loadedAlbums.count >= 15 { break }
+                }
+
+                self.albums = Array(loadedAlbums.prefix(20))
+            } catch {
+                print("Errore caricamento album per genere: \(error)")
+            }
         }
-    }
     
 }

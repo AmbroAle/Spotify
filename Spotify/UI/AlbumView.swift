@@ -8,6 +8,7 @@ struct AlbumView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(viewModel.genres) { genre in
@@ -29,8 +30,9 @@ struct AlbumView: View {
                     .padding(.horizontal)
                 }
 
-                List(viewModel.albums) { album in
-                    NavigationLink(destination: AlbumDetailView(album: album)) {
+                
+                if selectedGenre == nil {
+                    List(viewModel.albumsPopularity) { album in
                         HStack {
                             AsyncImage(url: URL(string: album.cover_medium)) { image in
                                 image.resizable().scaledToFill()
@@ -43,9 +45,31 @@ struct AlbumView: View {
                             VStack(alignment: .leading) {
                                 Text(album.title)
                                     .font(.headline)
-                                Text("ID Artista: \(album.artist.id)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
+                                Text(album.artist.name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                } else {
+                    List(viewModel.albums) { album in
+                        NavigationLink(destination: AlbumDetailView(album: album)) {
+                            HStack {
+                                AsyncImage(url: URL(string: album.cover_medium)) { image in
+                                    image.resizable().scaledToFill()
+                                } placeholder: {
+                                    Color.gray.opacity(0.2)
+                                }
+                                .frame(width: 60, height: 60)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                                VStack(alignment: .leading) {
+                                    Text(album.title)
+                                        .font(.headline)
+                                    Text("Data: \(album.release_date)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                     }
@@ -63,8 +87,11 @@ struct AlbumView: View {
                     }
                 }
             }
-
             BottomMenuView()
+        }
+        .task {
+            await viewModel.fetchGenres()
+            await viewModel.fetchNewReleases()
         }
     }
 }

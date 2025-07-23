@@ -24,7 +24,6 @@ struct DetailsAlbumArtist : Codable, Identifiable {
     let cover_medium: String
     let cover_xl : String
     let release_date: String
-    let artist: Artist
 }
 
 struct DeezerResponse<T: Codable>: Codable {
