@@ -4,7 +4,7 @@ struct TopBarView: View {
     @State private var selectedTab: String = "Artisti"
 
     var body: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 20) {
             Image("UserIconDarkMode")
                 .resizable()
                 .scaledToFill()
@@ -32,13 +32,14 @@ struct TopBarView: View {
                 .font(.caption)
                 .foregroundColor(.white) // testo sempre bianco
                 .padding(10)
-                .frame(maxWidth: 60)
+                .frame(maxWidth: 120)
+                .frame(minWidth: 90)
                 .background(
                     selectedTab == title ? Color.green.opacity(0.8) : Color.clear
                 )
                 .cornerRadius(10)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.white.opacity(0.6), lineWidth: 1.2) // contorno visibile sempre
                 )
         }
