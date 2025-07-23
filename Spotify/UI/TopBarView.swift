@@ -13,7 +13,7 @@ struct TopBarView: View {
                 .overlay(Circle().stroke(Color.black, lineWidth: 2))
 
             tabButton(title: "Artisti", destination: ArtistView())
-            tabButton(title: "Album", destination: EmptyView())
+            tabButton(title: "Album", destination: AlbumView())
 
             Spacer()
         }

@@ -17,7 +17,7 @@ struct AlbumCarouselView: View {
                 .padding(.leading)
 
             TabView {
-                ForEach(viewModel.albums) { album in
+                ForEach(viewModel.albumsPopularity) { album in
                     VStack {
                         AsyncImage(url: URL(string: album.cover_medium)) { image in
                             image.resizable().scaledToFit()
