@@ -16,6 +16,7 @@ struct HomeView: View {
 
                 BottomMenuView()
             }
+            .background(.ultraThinMaterial)
         }
     }
 }
