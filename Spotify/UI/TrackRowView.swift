@@ -26,6 +26,9 @@ struct TrackRowView: View {
                     if !track.preview.isEmpty {
                         Button(action: {
                             viewModel.playOrPause(track: track)
+                            if viewModel.currentlyPlayingTrackID != track.id {
+                                    viewModel.saveRecentTrack(track)
+                                }
                         }) {
                             Image(systemName: viewModel.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()

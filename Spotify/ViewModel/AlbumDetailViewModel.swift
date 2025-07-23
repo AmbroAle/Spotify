@@ -113,4 +113,26 @@ class AlbumDetailViewModel: ObservableObject {
                 self.likedTracks = Set(ids)
             }
     }
+    
+    func saveRecentTrack(_ track: TrackAlbumDetail) {
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+        let trackRef = db.collection("users").document(userID).collection("recentTracks").document("\(track.id)")
+
+        let trackData: [String: Any] = [
+            "id": track.id,
+            "title": track.title,
+            "preview": track.preview,
+            "timestamp": Timestamp(date: Date())
+        ]
+
+        trackRef.setData(trackData) { error in
+            if let error = error {
+                print("Errore salvataggio traccia recente: \(error.localizedDescription)")
+            } else {
+                print("Traccia recente salvata")
+            }
+        }
+    }
 }

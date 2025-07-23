@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseFirestore
 
 struct Track: Identifiable, Codable {
     let id: Int
@@ -17,6 +18,13 @@ struct TrackAlbumDetail : Codable , Identifiable{
     let id: Int
     let title: String
     let preview: String
+}
+
+struct TrackRecentPlay : Codable, Identifiable {
+    let id: Int
+    let title: String
+    let preview: String
+    let timestamp: Timestamp
 }
 
 struct DeezerTrackResponse: Codable {
