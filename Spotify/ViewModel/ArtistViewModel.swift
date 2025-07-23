@@ -11,12 +11,14 @@ import Foundation
 class ArtistViewModel: ObservableObject {
     @Published var artists: [Artist] = []
     @Published var searchQuery: String = ""
+    @Published var genres: [Genre] = []
 
     private let baseURL = "https://api.deezer.com"
 
     init() {
         Task {
             await fetchTopArtists()
+            await fetchGenres()
         }
     }
 
@@ -49,6 +51,32 @@ class ArtistViewModel: ObservableObject {
             }
         } catch {
             print("Errore nella ricerca: \(error)")
+        }
+    }
+    
+    func fetchGenres() async {
+        guard let url = URL(string: "\(baseURL)/genre") else { return }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let result = try? JSONDecoder().decode(DeezerResponse<Genre>.self, from: data) {
+                self.genres = result.data.filter { $0.id != 0 }
+            }
+        } catch {
+            print("Errore nel fetch dei generi: \(error)")
+        }
+    }
+    
+    func fetchArtistsByGenre(genreID: Int) async {
+        guard let url = URL(string: "\(baseURL)/genre/\(genreID)/artists") else { return }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let result = try? JSONDecoder().decode(TopArtistResponse.self, from: data) {
+                self.artists = result.data
+            }
+        } catch {
+            print("Errore nel fetch artisti per genere: \(error)")
         }
     }
 }

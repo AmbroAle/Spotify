@@ -22,6 +22,12 @@ struct TopTags: Codable {
     let tag: [GenreTag]
 }
 
+struct Genre : Codable, Identifiable {
+    let id: Int
+    let name: String
+    let picture: String
+}
+
 struct GenreTag: Codable {
     let name: String
     let count: Int

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ArtistView: View {
     @StateObject private var viewModel = ArtistViewModel()
+    @State private var selectedGenre: Genre? = nil
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -17,6 +18,27 @@ struct ArtistView: View {
                             await viewModel.searchArtists()
                         }
                     }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(viewModel.genres) { genre in
+                            Button(action: {
+                                selectedGenre = genre
+                                Task {
+                                    await viewModel.fetchArtistsByGenre(genreID: genre.id)
+                                }
+                            }) {
+                                Text(genre.name)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(selectedGenre?.id == genre.id ? Color.green : Color.green.opacity(0.4))
+                                    .foregroundColor(selectedGenre?.id == genre.id ? .white : .white)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
 
                 List(viewModel.artists) { artist in
                     NavigationLink(destination: ArtistDetailView(artist: artist)){
