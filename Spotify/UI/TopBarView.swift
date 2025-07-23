@@ -14,6 +14,7 @@ struct TopBarView: View {
 
             tabButton(title: "Artisti", destination: ArtistView())
             tabButton(title: "Album", destination: AlbumView())
+            tabButton(title: "Classifiche", destination: EmptyView())
 
             Spacer()
         }
