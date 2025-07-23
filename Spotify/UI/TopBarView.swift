@@ -18,7 +18,9 @@ struct TopBarView: View {
             Spacer()
         }
         .padding([.top, .horizontal])
+        .padding(.bottom, 8)
         .background(.ultraThinMaterial)
+
     }
 
     // MARK: - Tab Button
