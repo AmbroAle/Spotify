@@ -35,7 +35,7 @@ struct TrackRowView: View {
                     }
 
                     Button(action: {
-                        viewModel.toggleLike(for: track.id)
+                        viewModel.toggleLike(for: track)
                     }) {
                         Image(systemName: viewModel.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                             .resizable()

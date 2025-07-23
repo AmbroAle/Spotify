@@ -28,6 +28,7 @@ struct AlbumDetailView: View {
         .onAppear {
             Task {
                 await viewModel.fetchTracks(for: album.id)
+                viewModel.fetchLikedTracks()
             }
         }
 

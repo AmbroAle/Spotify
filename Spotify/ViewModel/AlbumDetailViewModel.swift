@@ -1,5 +1,7 @@
 import Foundation
 import AVFoundation
+import FirebaseFirestore
+import FirebaseAuth
 
 @MainActor
 class AlbumDetailViewModel: ObservableObject {
@@ -22,11 +24,13 @@ class AlbumDetailViewModel: ObservableObject {
         }
     }
 
-    func toggleLike(for trackID: Int) {
-        if likedTracks.contains(trackID) {
-            likedTracks.remove(trackID)
+    func toggleLike(for track: TrackAlbumDetail) {
+        if likedTracks.contains(track.id) {
+            likedTracks.remove(track.id)
+            removeLikedTrack(track.id)
         } else {
-            likedTracks.insert(trackID)
+            likedTracks.insert(track.id)
+            saveLikedTrack(track)
         }
     }
 
@@ -46,5 +50,67 @@ class AlbumDetailViewModel: ObservableObject {
     func stopPlayback() {
         audioPlayer?.pause()
         currentlyPlayingTrackID = nil
+    }
+
+    func saveLikedTrack(_ track: TrackAlbumDetail) {
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+        let trackData: [String: Any] = [
+            "title": track.title,
+            "preview": track.preview,
+            "id": track.id
+        ]
+
+        db.collection("users")
+            .document(userID)
+            .collection("likedTracks")
+            .document("\(track.id)")
+            .setData(trackData) { error in
+                if let error = error {
+                    print("Errore salvataggio: \(error.localizedDescription)")
+                } else {
+                    print("Brano salvato con successo")
+                }
+            }
+    }
+
+    func removeLikedTrack(_ trackID: Int) {
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(userID)
+            .collection("likedTracks")
+            .document("\(trackID)")
+            .delete { error in
+                if let error = error {
+                    print("Errore rimozione: \(error)")
+                } else {
+                    print("Brano rimosso")
+                }
+            }
+    }
+
+    func fetchLikedTracks() {
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(userID)
+            .collection("likedTracks")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Errore caricamento liked tracks: \(error)")
+                    return
+                }
+
+                guard let documents = snapshot?.documents else { return }
+                let ids = documents.compactMap { doc in
+                    Int(doc.documentID)
+                }
+
+                self.likedTracks = Set(ids)
+            }
     }
 }
