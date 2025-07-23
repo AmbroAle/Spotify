@@ -36,20 +36,34 @@ class AlbumDetailViewModel: ObservableObject {
 
     func playOrPause(track: TrackAlbumDetail) {
         if currentlyPlayingTrackID == track.id {
-            audioPlayer?.pause()
-            currentlyPlayingTrackID = nil
+            stopPlayback()
         } else {
-            if let url = URL(string: track.preview) {
-                audioPlayer = AVPlayer(url: url)
-                audioPlayer?.play()
-                currentlyPlayingTrackID = track.id
+            stopPlayback()
+
+            guard let url = URL(string: track.preview) else { return }
+            let playerItem = AVPlayerItem(url: url)
+            audioPlayer = AVPlayer(playerItem: playerItem)
+            audioPlayer?.play()
+            currentlyPlayingTrackID = track.id
+
+            NotificationCenter.default.addObserver(
+                forName: .AVPlayerItemDidPlayToEndTime,
+                object: playerItem,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                Task { @MainActor in
+                    self.currentlyPlayingTrackID = nil
+                }
             }
         }
     }
 
     func stopPlayback() {
         audioPlayer?.pause()
+        audioPlayer = nil
         currentlyPlayingTrackID = nil
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
     }
 
     func saveLikedTrack(_ track: TrackAlbumDetail) {
