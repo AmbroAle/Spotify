@@ -5,6 +5,8 @@ class AlbumViewModel: ObservableObject {
     @Published var albumsPopularity: [Album] = []
     @Published var albums: [Album] = []
     @Published var genres: [Genre] = []
+    @Published var searchQuery: String = ""
+    @Published var searchResults: [Album] = []
 
     private let baseURL = "https://api.deezer.com"
 
@@ -74,4 +76,26 @@ class AlbumViewModel: ObservableObject {
         }
     }
     
+    func searchAlbumsByName(_ query: String) async {
+        guard let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://api.deezer.com/search/album?q=\(encoded)") else { return }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoded = try JSONDecoder().decode(DeezerResponse<SearchedAlbum>.self, from: data)
+
+            // Mappa in `Album` compatibili
+            self.searchResults = decoded.data.map {
+                Album(
+                    id: $0.id,
+                    title: $0.title,
+                    cover_medium: $0.cover_medium,
+                    release_date: "N/D", 
+                    artist: AlbumArtist(name: $0.artist.name)
+                )
+            }
+        } catch {
+            print("Errore ricerca album: \(error.localizedDescription)")
+        }
+    }
 }

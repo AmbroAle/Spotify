@@ -6,7 +6,9 @@ struct AlbumView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var albumsToShow: [Album] {
-        if selectedGenre == nil {
+        if !viewModel.searchQuery.isEmpty {
+            return viewModel.searchResults
+        } else if selectedGenre == nil {
             return viewModel.albumsPopularity
         } else {
             return viewModel.albums
@@ -16,10 +18,28 @@ struct AlbumView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                TextField("Cerca album...", text: $viewModel.searchQuery)
+                    .padding(10)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+                    .padding([.horizontal, .top])
+                    .onChange(of: viewModel.searchQuery) { oldValue, newValue in
+                        Task {
+                            if newValue.isEmpty {
+                                viewModel.searchResults = []
+                            } else {
+                                selectedGenre = nil
+                                await viewModel.searchAlbumsByName(newValue)
+                            }
+                        }
+                    }
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(viewModel.genres) { genre in
                             Button(action: {
+                                viewModel.searchQuery = ""
+
                                 if selectedGenre?.id == genre.id {
                                     selectedGenre = nil
                                     Task {

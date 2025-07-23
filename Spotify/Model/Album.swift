@@ -13,6 +13,13 @@ struct Album: Codable, Identifiable {
     var artist: AlbumArtist?
 }
 
+struct SearchedAlbum: Codable,Identifiable {
+    let id: Int
+    let title: String
+    let cover_medium: String
+    let artist: AlbumArtist
+}
+
 
 struct AlbumArtist: Codable {
     let name: String

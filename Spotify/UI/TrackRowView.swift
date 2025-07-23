@@ -33,7 +33,7 @@ struct TrackRowView: View {
                             Image(systemName: viewModel.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()
                                 .frame(width: 24, height: 24)
-                                .foregroundColor(.blue)
+                                .foregroundColor(.green)
                         }
                     }
 
@@ -43,7 +43,7 @@ struct TrackRowView: View {
                         Image(systemName: viewModel.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                             .resizable()
                             .frame(width: 20, height: 20)
-                            .foregroundColor(.red)
+                            .foregroundColor(.green)
                     }
                 }
             }
