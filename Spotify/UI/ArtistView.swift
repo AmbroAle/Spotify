@@ -23,16 +23,23 @@ struct ArtistView: View {
                     HStack(spacing: 12) {
                         ForEach(viewModel.genres) { genre in
                             Button(action: {
-                                selectedGenre = genre
-                                Task {
-                                    await viewModel.fetchArtistsByGenre(genreID: genre.id)
+                                if selectedGenre?.id == genre.id {
+                                    selectedGenre = nil
+                                    Task {
+                                        await viewModel.fetchTopArtists()
+                                    }
+                                } else {
+                                    selectedGenre = genre
+                                    Task {
+                                        await viewModel.fetchArtistsByGenre(genreID: genre.id)
+                                    }
                                 }
                             }) {
                                 Text(genre.name)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
                                     .background(selectedGenre?.id == genre.id ? Color.green : Color.green.opacity(0.4))
-                                    .foregroundColor(selectedGenre?.id == genre.id ? .white : .white)
+                                    .foregroundColor(.white)
                                     .clipShape(Capsule())
                             }
                         }
