@@ -5,12 +5,12 @@ struct TopBarView: View {
 
     var body: some View {
         HStack(spacing: 24) {
-            Image("UserIcon")
+            Image("UserIconDarkMode")
                 .resizable()
                 .scaledToFill()
                 .frame(width: 40, height: 40)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.black, lineWidth: 2))
+                .overlay(Circle())
 
             tabButton(title: "Artisti", destination: ArtistView())
             tabButton(title: "Album", destination: AlbumView())
