@@ -25,6 +25,7 @@ struct SpotifyApp: App {
     var body: some Scene {
         WindowGroup {
             LoginView()
+                .preferredColorScheme(.dark)
         }
     }
 }
