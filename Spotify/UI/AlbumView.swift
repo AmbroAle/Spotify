@@ -5,23 +5,37 @@ struct AlbumView: View {
     @State private var selectedGenre: Genre? = nil
     @Environment(\.dismiss) private var dismiss
 
+    private var albumsToShow: [Album] {
+        if selectedGenre == nil {
+            return viewModel.albumsPopularity
+        } else {
+            return viewModel.albums
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack {
-                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(viewModel.genres) { genre in
                             Button(action: {
-                                selectedGenre = genre
-                                Task {
-                                    await viewModel.fetchAlbumsByGenre(genreID: genre.id)
+                                if selectedGenre?.id == genre.id {
+                                    selectedGenre = nil
+                                    Task {
+                                        await viewModel.fetchNewReleases()
+                                    }
+                                } else {
+                                    selectedGenre = genre
+                                    Task {
+                                        await viewModel.fetchAlbumsByGenre(genreID: genre.id)
+                                    }
                                 }
                             }) {
                                 Text(genre.name)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(selectedGenre?.id == genre.id ? Color.blue : Color.blue.opacity(0.4))
+                                    .background(selectedGenre?.id == genre.id ? Color.green : Color.green.opacity(0.4))
                                     .foregroundColor(.white)
                                     .clipShape(Capsule())
                             }
@@ -30,9 +44,8 @@ struct AlbumView: View {
                     .padding(.horizontal)
                 }
 
-                
-                if selectedGenre == nil {
-                    List(viewModel.albumsPopularity) { album in
+                List(albumsToShow) { album in
+                    NavigationLink(destination: AlbumDetailView(album: album)) {
                         HStack {
                             AsyncImage(url: URL(string: album.cover_medium)) { image in
                                 image.resizable().scaledToFill()
@@ -42,34 +55,19 @@ struct AlbumView: View {
                             .frame(width: 60, height: 60)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                            VStack(alignment: .leading) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(album.title)
                                     .font(.headline)
-                                Text(album.artist.name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                } else {
-                    List(viewModel.albums) { album in
-                        NavigationLink(destination: AlbumDetailView(album: album)) {
-                            HStack {
-                                AsyncImage(url: URL(string: album.cover_medium)) { image in
-                                    image.resizable().scaledToFill()
-                                } placeholder: {
-                                    Color.gray.opacity(0.2)
-                                }
-                                .frame(width: 60, height: 60)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                                VStack(alignment: .leading) {
-                                    Text(album.title)
-                                        .font(.headline)
-                                    Text("Data: \(album.release_date)")
+                                
+                                if let artistName = album.artist?.name {
+                                    Text(artistName)
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
+
+                                Text("Data: \(album.release_date)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
                             }
                         }
                     }
@@ -87,6 +85,7 @@ struct AlbumView: View {
                     }
                 }
             }
+
             BottomMenuView()
         }
         .task {

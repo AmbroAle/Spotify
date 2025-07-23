@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AlbumDetailView: View {
-    let album: DetailsAlbumArtist
+    let album: Album
     @StateObject private var viewModel = AlbumDetailViewModel()
     @Environment(\.dismiss) private var dismiss
 

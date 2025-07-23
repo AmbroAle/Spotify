@@ -3,7 +3,7 @@ import Foundation
 @MainActor
 class AlbumViewModel: ObservableObject {
     @Published var albumsPopularity: [Album] = []
-    @Published var albums: [DetailsAlbumArtist] = []
+    @Published var albums: [Album] = []
     @Published var genres: [Genre] = []
 
     private let baseURL = "https://api.deezer.com"
@@ -41,27 +41,37 @@ class AlbumViewModel: ObservableObject {
     }
 
     func fetchAlbumsByGenre(genreID: Int) async {
-            guard let url = URL(string: "\(baseURL)/genre/\(genreID)/artists") else { return }
+        guard let url = URL(string: "\(baseURL)/genre/\(genreID)/artists") else { return }
 
-            do {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let result = try JSONDecoder().decode(DeezerResponse<Artist>.self, from: data)
+            let artists = result.data.prefix(5)
+
+            var loadedAlbums: [Album] = []
+
+            for artist in artists {
+                guard let url = URL(string: "\(baseURL)/artist/\(artist.id)/albums") else { continue }
                 let (data, _) = try await URLSession.shared.data(from: url)
-                let result = try JSONDecoder().decode(DeezerResponse<Artist>.self, from: data)
-                let artists = result.data.prefix(5)
+                let response = try JSONDecoder().decode(DeezerResponse<Album>.self, from: data)
 
-                var loadedAlbums: [DetailsAlbumArtist] = []
-
-                for artist in artists {
-                    guard let url = URL(string: "\(baseURL)/artist/\(artist.id)/albums") else { continue }
-                    let (data, _) = try await URLSession.shared.data(from: url)
-                    let albumResponse = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
-                    loadedAlbums += albumResponse.data
-                    if loadedAlbums.count >= 15 { break }
+                for var album in response.data {
+                    album.artist = AlbumArtist(name: artist.name)
+                    loadedAlbums.append(album)
+                    if loadedAlbums.count >= 50 { break }
                 }
 
-                self.albums = Array(loadedAlbums.prefix(20))
-            } catch {
-                print("Errore caricamento album per genere: \(error)")
+                if loadedAlbums.count >= 50 { break }
             }
+
+            let groupedByTitle = Dictionary(grouping: loadedAlbums, by: { $0.title })
+            let uniqueAlbums = groupedByTitle.compactMap { $0.value.max(by: { $0.release_date < $1.release_date }) }
+
+            self.albums = uniqueAlbums.sorted(by: { $0.release_date > $1.release_date }).prefix(20).map { $0 }
+
+        } catch {
+            print("Errore caricamento album per genere: \(error)")
         }
+    }
     
 }

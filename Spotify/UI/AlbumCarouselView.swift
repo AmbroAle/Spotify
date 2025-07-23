@@ -31,7 +31,7 @@ struct AlbumCarouselView: View {
                             .font(.headline)
                             .lineLimit(1)
 
-                        Text(album.artist.name)
+                        Text(album.artist?.name ?? "")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }

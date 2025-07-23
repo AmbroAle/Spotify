@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 class ArtistAlbumViewModel: ObservableObject {
-    @Published var albums: [DetailsAlbumArtist] = []
+    @Published var albums: [Album] = []
     @Published var genres: [String] = []
 
     func fetchAlbums(for artistID: Int) async {
@@ -14,7 +14,7 @@ class ArtistAlbumViewModel: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            let decoded = try JSONDecoder().decode(DeezerResponse<DetailsAlbumArtist>.self, from: data)
+            let decoded = try JSONDecoder().decode(DeezerResponse<Album>.self, from: data)
             
             let groupedByTitle = Dictionary(grouping: decoded.data, by: \.title)
             let uniqueAlbums = groupedByTitle.compactMap { $0.value.max(by: { $0.release_date < $1.release_date }) }

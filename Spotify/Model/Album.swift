@@ -8,22 +8,14 @@
 struct Album: Codable, Identifiable {
     let id: Int
     let title: String
-    let release_date: String
     let cover_medium: String
-    let artist: AlbumArtist
+    let release_date: String
+    var artist: AlbumArtist?
 }
 
 
 struct AlbumArtist: Codable {
     let name: String
-}
-
-struct DetailsAlbumArtist : Codable, Identifiable {
-    let id: Int
-    let title: String
-    let cover_medium: String
-    let cover_xl : String
-    let release_date: String
 }
 
 struct DeezerResponse<T: Codable>: Codable {
