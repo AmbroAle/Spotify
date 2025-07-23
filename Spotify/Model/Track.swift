@@ -1,11 +1,5 @@
-//
-//  Track.swift
-//  Spotify
-//
-//  Created by Alessandro Ambrogiani on 20/07/25.
-//
-
 import Foundation
+import FirebaseFirestore
 
 struct Track: Identifiable, Codable {
     let id: Int
@@ -17,6 +11,20 @@ struct Track: Identifiable, Codable {
 
 struct TrackAlbum: Codable {
     let cover_medium: String
+    let title: String
+}
+
+struct TrackAlbumDetail : Codable , Identifiable{
+    let id: Int
+    let title: String
+    let preview: String
+}
+
+struct TrackRecentPlay : Codable, Identifiable {
+    let id: Int
+    let title: String
+    let preview: String
+    let timestamp: Timestamp
 }
 
 struct DeezerTrackResponse: Codable {

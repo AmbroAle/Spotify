@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */; };
+		ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */; };
 		EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EDFD78802E27E5CA000D2EAF /* FirebaseAuth */; };
 		EDFD78832E27E5D0000D2EAF /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = EDFD78822E27E5D0000D2EAF /* FirebaseCore */; };
 /* End PBXBuildFile section */
@@ -70,6 +72,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */,
+				ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */,
 				EDFD78832E27E5D0000D2EAF /* FirebaseCore in Frameworks */,
 				EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */,
 			);
@@ -142,6 +146,8 @@
 			packageProductDependencies = (
 				EDFD78802E27E5CA000D2EAF /* FirebaseAuth */,
 				EDFD78822E27E5D0000D2EAF /* FirebaseCore */,
+				ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */,
+				ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */,
 			);
 			productName = Spotify;
 			productReference = EDADB21E2E254D4400EF08CC /* Spotify.app */;
@@ -606,6 +612,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		EDFD78802E27E5CA000D2EAF /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

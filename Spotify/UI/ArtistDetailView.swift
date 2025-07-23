@@ -50,21 +50,23 @@ struct ArtistDetailView: View {
                 }
 
                 List(viewModel.albums) { album in
-                    HStack {
-                        AsyncImage(url: URL(string: album.cover_medium)) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    NavigationLink(destination: AlbumDetailView(album : album)) {
+                        HStack {
+                            AsyncImage(url: URL(string: album.cover_medium)) { image in
+                                image.resizable().scaledToFill()
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 60, height: 60)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                        VStack(alignment: .leading) {
-                            Text(album.title)
-                                .font(.headline)
-                            Text("Uscita: \(album.release_date)")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            VStack(alignment: .leading) {
+                                Text(album.title)
+                                    .font(.headline)
+                                Text("Uscita: \(album.release_date)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                 }
