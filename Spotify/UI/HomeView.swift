@@ -18,6 +18,7 @@ struct HomeView: View {
             }
             .background(.ultraThinMaterial)
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
