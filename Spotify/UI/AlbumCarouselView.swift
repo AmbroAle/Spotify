@@ -9,6 +9,13 @@ import SwiftUI
 struct AlbumCarouselView: View {
     @StateObject var viewModel = AlbumViewModel()
 
+    // Divide gli album in gruppi da 3
+    private var groupedAlbums: [[Album]] {
+        stride(from: 0, to: viewModel.albumsPopularity.count, by: 3).map {
+            Array(viewModel.albumsPopularity[$0..<min($0 + 3, viewModel.albumsPopularity.count)])
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Album più popolari")
@@ -17,34 +24,33 @@ struct AlbumCarouselView: View {
                 .padding(.leading)
 
             TabView {
-                ForEach(viewModel.albumsPopularity) { album in
-                    VStack {
-                        AsyncImage(url: URL(string: album.cover_medium)) { image in
-                            image.resizable().scaledToFit()
-                        } placeholder: {
-                            ProgressView()
+                ForEach(groupedAlbums.indices, id: \.self) { index in
+                    HStack(spacing: 16) {
+                        ForEach(groupedAlbums[index], id: \.id) { album in
+                            VStack {
+                                AsyncImage(url: URL(string: album.cover_medium)) { image in
+                                    image.resizable().scaledToFit()
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 100, height: 100)
+                                .cornerRadius(12)
+
+                                Text(album.title)
+                                    .font(.caption)
+                                    .lineLimit(1)
+
+                                Text(album.artist?.name ?? "")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(width: 100)
                         }
-                        .frame(width: 250, height: 250)
-                        .cornerRadius(16)
-
-                        Text(album.title)
-                            .font(.headline)
-                            .lineLimit(1)
-
-                        Text(album.artist?.name ?? "")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
                     }
                     .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(.systemGray6))
-                            .shadow(color: .gray.opacity(0.3), radius: 5, x: 0, y: 3)
-                    )
-                    .padding(.horizontal, 16)
                 }
             }
-            .frame(height: 340)
+            .frame(height: 200)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
             .task {
                 await viewModel.fetchNewReleases()
