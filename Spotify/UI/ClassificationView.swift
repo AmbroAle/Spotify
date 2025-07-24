@@ -15,7 +15,7 @@ struct ClassificationView: View {
                             .padding(.top, 32)
 
                         VStack(spacing: 16) {
-                            NavigationLink(destination: Text("Classifica Globale")) {
+                            NavigationLink(destination: GlobalChartView()) {
                                 classificationCard(
                                     imageName: "spotify-top-50-global",
                                     title: "Top Global",
@@ -23,7 +23,7 @@ struct ClassificationView: View {
                                 )
                             }
 
-                            NavigationLink(destination: Text("Classifica Nazionale")) {
+                            NavigationLink(destination: CountryChartView(country: "italy")) {
                                 classificationCard(
                                     imageName: "region_it_default",
                                     title: "Top Country",

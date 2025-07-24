@@ -27,6 +27,7 @@ struct TrackRecentPlay : Codable, Identifiable {
     let timestamp: Timestamp
 }
 
+
 struct DeezerTrackResponse: Codable {
     let data: [Track]
 }
