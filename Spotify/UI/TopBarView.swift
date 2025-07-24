@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TopBarView: View {
-    @State private var selectedTab: String = "Artisti"
+    @State private var selectedTab: String? = nil
 
     var body: some View {
         HStack(spacing: 20) {
@@ -21,6 +21,9 @@ struct TopBarView: View {
         .padding([.top, .horizontal])
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
+        .onAppear {
+                selectedTab = nil 
+        }
 
     }
 
