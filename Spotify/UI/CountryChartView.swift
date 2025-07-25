@@ -34,6 +34,8 @@ struct CountryChartView: View {
                                         .frame(width: 24, height: 24)
                                         .foregroundColor(.green)
                                 }
+                                .buttonStyle(.plain)
+                                .contentShape(Rectangle())
                             }
 
                             Button {
@@ -45,10 +47,16 @@ struct CountryChartView: View {
                                     .foregroundColor(.green)
                             }
                         }
+                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
                     }
                 }
                 .padding(.vertical, 6)
+                .contentShape(Rectangle())
+                .onTapGesture {}
             }
+            .listStyle(.plain)
+            .listRowSeparator(.hidden)
 
             BottomMenuView()
         }

@@ -20,34 +20,43 @@ struct GlobalChartView: View {
                             .font(.headline)
                             .lineLimit(1)
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: 16) {
                             if !track.preview.isEmpty {
-                                Button {
+                                Button(action: {
                                     viewModelTrack.playOrPause(track: track)
                                     if viewModelTrack.currentlyPlayingTrackID != track.id {
                                         viewModelTrack.saveRecentTrack(track)
                                     }
-                                } label: {
+                                }) {
                                     Image(systemName: viewModelTrack.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
                                         .resizable()
                                         .frame(width: 24, height: 24)
                                         .foregroundColor(.green)
                                 }
+                                .buttonStyle(PlainButtonStyle())
+                                .contentShape(Rectangle())
                             }
 
-                            Button {
+                            Button(action: {
                                 viewModelTrack.toggleLike(for: track)
-                            } label: {
+                            }) {
                                 Image(systemName: viewModelTrack.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                                     .resizable()
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.green)
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            .contentShape(Rectangle())
                         }
                     }
+                    Spacer()
                 }
                 .padding(.vertical, 6)
+                .contentShape(Rectangle())
+                .onTapGesture {}
             }
+            .listStyle(.plain)
+            .listRowSeparator(.hidden)
 
             BottomMenuView()
         }
