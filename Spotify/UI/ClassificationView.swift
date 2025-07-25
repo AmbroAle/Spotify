@@ -34,22 +34,8 @@ struct ClassificationView: View {
                     }
                 }
 
-                BottomMenuView()
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Classifiche")
-            .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
         }
     }
 

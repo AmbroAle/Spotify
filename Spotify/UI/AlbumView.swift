@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AlbumView: View {
-    @StateObject private var viewModel = AlbumViewModel()
+    @ObservedObject var viewModel: AlbumViewModel
     @State private var selectedGenre: Genre? = nil
     @Environment(\.dismiss) private var dismiss
 
@@ -63,6 +63,7 @@ struct AlbumView: View {
                     }
                     .padding(.horizontal)
                 }
+                .padding(.top, 10)
 
                 List(albumsToShow) { album in
                     NavigationLink(destination: AlbumDetailView(album: album)) {
@@ -93,20 +94,8 @@ struct AlbumView: View {
                     }
                 }
             }
-            .navigationTitle("Album")
             .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
 
-            BottomMenuView()
         }
         .task {
             await viewModel.fetchGenres()

@@ -23,6 +23,7 @@ class ArtistViewModel: ObservableObject {
     }
 
     func fetchTopArtists() async {
+        print("fetchTopArtists called")
         guard let url = URL(string: "\(baseURL)/chart/0/artists") else { return }
 
         do {
