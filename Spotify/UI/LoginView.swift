@@ -10,11 +10,21 @@ struct LoginView: View {
         NavigationStack {
             ZStack(alignment: .top) {
                 VStack(spacing: 20) {
+                    HStack(spacing: 12) {
+                        Image("Sonix")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+
+                        Text("Sonix")
+                            .font(.system(size: 36, weight: .medium))
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary) // oppure bianco, se su sfondo scuro
+                    }
+                    .padding(.bottom, 20)
+
                     
-                    Image("Full_Logo_Green_RGB")
-                        .resizable()
-                        .scaledToFit()
-                        .padding(.bottom, 80)
+
 
                     TextField("Email", text: $email)
                         .keyboardType(.emailAddress)
@@ -22,12 +32,12 @@ struct LoginView: View {
                         .autocorrectionDisabled()
                         .padding()
                         .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
+                        .cornerRadius(16)
 
                     SecureField("Password", text: $password)
                         .padding()
                         .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
+                        .cornerRadius(16)
 
                     if let error = authVM.errorMessage {
                         Text(error)
@@ -44,11 +54,28 @@ struct LoginView: View {
                         }
                     }) {
                         Text(isRegistering ? "Registrati" : "Accedi")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .padding(5)
+                            .frame(minWidth: 140, maxWidth: 200)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1.0)
+                            )
+                            .background(
+                                Color(red: 17/255, green: 158/255, blue: 92/255)//colore del logo
+                            )
+                            .background(
+                                BlurView(style: .systemUltraThinMaterial)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
+                            .cornerRadius(16)
+
                     }
 
                     Button(action: {
