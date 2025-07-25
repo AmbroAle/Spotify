@@ -11,12 +11,11 @@ struct TrackCarouselView: View {
     @StateObject private var viewModel = TrackViewModel()
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .center) {
             Text("Tracce più popolari")
-                .font(.title2)
+                .font(.title)
                 .bold()
-                .padding(.leading)
-
+                .padding(.top)
             TabView {
                 ForEach(viewModel.tracks) { track in
                     VStack {

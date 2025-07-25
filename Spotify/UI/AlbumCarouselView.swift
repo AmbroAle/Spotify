@@ -17,7 +17,7 @@ struct AlbumCarouselView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .center) {
             Text("Album più popolari")
                 .font(.title2)
                 .bold()
