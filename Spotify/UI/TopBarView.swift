@@ -12,7 +12,7 @@ struct TopBarView: View {
                 .clipShape(Circle())
                 .overlay(Circle())
                 .padding(.leading, 20)
-
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     tabButton(title: "Tutti")
@@ -40,6 +40,10 @@ struct TopBarView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.white.opacity(0.2), lineWidth: 1.0)
                 )
+                .background(
+                    (selectedTab == title ? Color.green.opacity(0.8) : Color.white.opacity(0.05))
+                )
+                .cornerRadius(10)
                 .background(
                     BlurView(style: .systemUltraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
