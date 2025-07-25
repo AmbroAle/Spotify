@@ -10,8 +10,7 @@ struct TopBarView: View {
                 .scaledToFill()
                 .frame(width: 40, height: 40)
                 .clipShape(Circle())
-                .overlay(Circle())
-                .padding(.leading, 20)
+                .padding(.leading, 6)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -21,6 +20,7 @@ struct TopBarView: View {
                     tabButton(title: "Classifiche")
                 }
             }
+            .padding(.bottom, 5)  
             Spacer()
         }
         .frame(maxWidth: UIScreen.main.bounds.width)
