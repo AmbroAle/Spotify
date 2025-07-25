@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TopBarView: View {
-    @State private var selectedTab: String? = nil
+    @Binding var selectedTab: String
 
     var body: some View {
         HStack(spacing: 14) {
@@ -13,25 +13,24 @@ struct TopBarView: View {
                 .overlay(Circle())
                 .padding(.leading, 20)
 
-            tabButton(title: "Artisti", destination: ArtistView())
-            tabButton(title: "Album", destination: AlbumView())
-            tabButton(title: "Classifiche", destination: ClassificationView())
-
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    tabButton(title: "Tutti")
+                    tabButton(title: "Artisti")
+                    tabButton(title: "Album")
+                    tabButton(title: "Classifiche")
+                }
+            }
             Spacer()
         }
-        .padding([.top, .horizontal])
-        .padding(.bottom, 8)
+        .frame(maxWidth: UIScreen.main.bounds.width)
         .background(.ultraThinMaterial)
-        .onAppear {
-                selectedTab = nil 
-        }
-
     }
 
-    // MARK: - Tab Button
-    @ViewBuilder
-    private func tabButton<T: View>(title: String, destination: T) -> some View {
-        NavigationLink(destination: destination) {
+    private func tabButton(title: String) -> some View {
+        Button(action: {
+            selectedTab = title
+        }) {
             Text(title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
@@ -51,8 +50,5 @@ struct TopBarView: View {
                 )
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
         }
-        .simultaneousGesture(TapGesture().onEnded {
-            selectedTab = title
-        })
     }
 }
