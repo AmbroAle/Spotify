@@ -46,37 +46,22 @@ struct LoginView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    Button(action: {
-                        if isRegistering {
-                            authVM.register(email: email, password: password)
-                        } else {
-                            authVM.login(email: email, password: password)
-                        }
-                    }) {
-                        Text(isRegistering ? "Registrati" : "Accedi")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(5)
-                            .frame(minWidth: 140, maxWidth: 200)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 1.0)
-                            )
-                            .background(
-                                Color(red: 17/255, green: 158/255, blue: 92/255)//colore del logo
-                            )
-                            .background(
-                                BlurView(style: .systemUltraThinMaterial)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                            )
-                            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
-                            .cornerRadius(16)
+                    LiquidGlassButton(
+                        title: isRegistering ? "Registrati" : "Accedi",
+                        action: {
+                            if isRegistering {
+                                authVM.register(email: email, password: password)
+                            } else {
+                                authVM.login(email: email, password: password)
+                            }
+                        },
+                        gradientColors: [
+                            Color.green.opacity(0.4),
+                            Color.green.opacity(0.60)
+                        ]
+                    )
 
-                    }
+
 
                     Button(action: {
                         isRegistering.toggle()
