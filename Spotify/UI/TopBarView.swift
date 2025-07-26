@@ -5,13 +5,16 @@ struct TopBarView: View {
     
     var body: some View {
         HStack(spacing: 14) {
-            Image("UserIconDarkMode")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-                .padding(.leading, 6)
-            
+            NavigationLink(destination: ProfileView()) {
+                Image("UserIconDarkMode")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+                    .padding(.leading, 6)
+            }
+            .buttonStyle(PlainButtonStyle())
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     tabButton(title: "Tutti")
