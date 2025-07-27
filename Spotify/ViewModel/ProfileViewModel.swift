@@ -20,31 +20,70 @@ class ProfileViewModel: ObservableObject {
     private let db = Firestore.firestore()
 
     func fetchUserProfile() {
-        guard let userID = Auth.auth().currentUser?.uid else {
+        print("🔄 Inizio fetch profilo utente...")
+        
+        guard let currentUser = Auth.auth().currentUser else {
+            print("Nessun utente autenticato")
             username = "Ospite"
             email = ""
             userImageURL = nil
             return
         }
-
-        let userDocRef = db.collection("users").document(userID)
+        
+        print("🔍 Recupero dati per UID: \(currentUser.uid)")
+        
+        let userDocRef = db.collection("users").document(currentUser.uid)
         userDocRef.getDocument { [weak self] document, error in
             guard let self = self else { return }
+            
             if let error = error {
                 print("Errore fetch profilo: \(error.localizedDescription)")
+                self.username = "Errore caricamento"
                 return
             }
 
             if let doc = document, doc.exists {
-                self.username = doc.data()?["username"] as? String ?? "Sconosciuto"
-                self.email = doc.data()?["email"] as? String ?? ""
+                print("Documento utente trovato")
+                let data = doc.data()
+                print("📄 Dati ricevuti: \(data ?? [:])")
+                
+                self.username = data?["username"] as? String ?? "Sconosciuto"
+                self.email = data?["email"] as? String ?? currentUser.email ?? ""
 
-                if let urlString = doc.data()?["profileImageURL"] as? String,
+                if let urlString = data?["profileImageURL"] as? String, !urlString.isEmpty,
                    let url = URL(string: urlString) {
                     self.userImageURL = url
+                    print("URL immagine profilo trovato: \(urlString)")
+                } else {
+                    print("Nessuna immagine profilo trovata")
                 }
             } else {
-                print("Documento utente non trovato")
+                print("Documento utente non trovato, creazione automatica...")
+                // Crea automaticamente il documento se non esiste
+                self.createMissingUserDocument(currentUser)
+            }
+        }
+    }
+    
+    private func createMissingUserDocument(_ user: User) {
+        let email = user.email ?? ""
+        let username = String(email.split(separator: "@").first ?? "Utente")
+        
+        let userData: [String: Any] = [
+            "username": username,
+            "email": email,
+            "createdAt": Timestamp(date: Date()),
+            "profileImageURL": ""
+        ]
+        
+        db.collection("users").document(user.uid).setData(userData) { [weak self] error in
+            if let error = error {
+                print("Errore creazione documento utente: \(error.localizedDescription)")
+                self?.username = "Errore"
+            } else {
+                print("Documento utente creato automaticamente")
+                self?.username = username
+                self?.email = email
             }
         }
     }
@@ -52,6 +91,7 @@ class ProfileViewModel: ObservableObject {
     func logout() {
         do {
             try Auth.auth().signOut()
+            print("Logout effettuato")
         } catch {
             print("Errore logout: \(error.localizedDescription)")
         }
