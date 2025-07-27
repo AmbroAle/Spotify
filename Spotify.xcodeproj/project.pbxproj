@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9551F2702E35923B00DC87D7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9551F26F2E35923B00DC87D7 /* FirebaseStorage */; };
+		9551F2722E35926600DC87D7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9551F2712E35926600DC87D7 /* FirebaseStorage */; };
 		ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */; };
 		ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */; };
 		EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EDFD78802E27E5CA000D2EAF /* FirebaseAuth */; };
@@ -75,7 +77,9 @@
 				ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */,
 				ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */,
 				EDFD78832E27E5D0000D2EAF /* FirebaseCore in Frameworks */,
+				9551F2702E35923B00DC87D7 /* FirebaseStorage in Frameworks */,
 				EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */,
+				9551F2722E35926600DC87D7 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +152,8 @@
 				EDFD78822E27E5D0000D2EAF /* FirebaseCore */,
 				ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */,
 				ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */,
+				9551F26F2E35923B00DC87D7 /* FirebaseStorage */,
+				9551F2712E35926600DC87D7 /* FirebaseStorage */,
 			);
 			productName = Spotify;
 			productReference = EDADB21E2E254D4400EF08CC /* Spotify.app */;
@@ -434,6 +440,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W6CZ5WU5HZ;
@@ -452,6 +459,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alessandro.Spotifyclone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -463,6 +471,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W6CZ5WU5HZ;
@@ -481,6 +490,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alessandro.Spotifyclone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -612,6 +622,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9551F26F2E35923B00DC87D7 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseStorage;
+		};
+		9551F2712E35926600DC87D7 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseStorage;
+		};
 		ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
