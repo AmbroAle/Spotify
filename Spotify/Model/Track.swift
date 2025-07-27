@@ -10,6 +10,7 @@ struct Track: Identifiable, Codable {
 }
 
 struct TrackAlbum: Codable {
+    let id: Int
     let cover_medium: String
     let title: String
 }

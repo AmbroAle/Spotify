@@ -1,9 +1,3 @@
-//
-//  AlbumCarouselView.swift
-//  Spotify
-//
-//  Created by Alessandro Ambrogiani on 20/07/25.
-//
 import SwiftUI
 
 struct AlbumCarouselView: View {
@@ -27,24 +21,27 @@ struct AlbumCarouselView: View {
                 ForEach(groupedAlbums.indices, id: \.self) { index in
                     HStack(spacing: 16) {
                         ForEach(groupedAlbums[index], id: \.id) { album in
-                            VStack {
-                                AsyncImage(url: URL(string: album.cover_medium)) { image in
-                                    image.resizable().scaledToFit()
-                                } placeholder: {
-                                    ProgressView()
+                            NavigationLink(destination: AlbumDetailView(album: album)) {
+                                VStack {
+                                    AsyncImage(url: URL(string: album.cover_medium)) { image in
+                                        image.resizable().scaledToFit()
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                    .frame(width: 100, height: 100)
+                                    .cornerRadius(12)
+
+                                    Text(album.title)
+                                        .font(.caption)
+                                        .lineLimit(1)
+
+                                    Text(album.artist?.name ?? "")
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
                                 }
-                                .frame(width: 100, height: 100)
-                                .cornerRadius(12)
-
-                                Text(album.title)
-                                    .font(.caption)
-                                    .lineLimit(1)
-
-                                Text(album.artist?.name ?? "")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray)
+                                .frame(width: 100)
                             }
-                            .frame(width: 100)
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding()

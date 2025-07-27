@@ -9,34 +9,36 @@ struct ArtistDetailView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    ArtistHeaderView(artist: artist)
-                    
-                    if !viewModel.genres.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Generi")
-                                .font(.headline)
-                            
-                            LazyVGrid(columns: columns, alignment: .leading) {
-                                ForEach(viewModel.genres, id: \.self) { genre in
-                                    GenreTagView(genre: genre)
-                                }
+            List {
+                // Header con immagine artista
+                ArtistHeaderView(artist: artist)
+                    .listRowInsets(EdgeInsets()) // rimuove padding extra
+
+                // Se ci sono generi
+                if !viewModel.genres.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Generi")
+                            .font(.headline)
+                        
+                        LazyVGrid(columns: columns, alignment: .leading) {
+                            ForEach(viewModel.genres, id: \.self) { genre in
+                                GenreTagView(genre: genre)
                             }
-                            .padding(.horizontal)
                         }
-                        .padding()
-                    }
-                    
-                    LazyVStack(spacing: 0) {
-                        ForEach(viewModel.albums) { album in
-                            AlbumRowView(album: album)
-                        }
+                        .padding(.top, 4)
                     }
                     .padding(.horizontal)
-                    .padding(.top)
+                    .padding(.bottom)
+                    .listRowBackground(Color.clear)
+                }
+
+                // Album
+                ForEach(viewModel.albums) { album in
+                    AlbumRowView(album: album)
+                        .listRowSeparator(.visible)
                 }
             }
+            .listStyle(.plain)
             .navigationTitle("Album di \(artist.name)")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
@@ -50,13 +52,12 @@ struct ArtistDetailView: View {
                     }
                 }
             }
-            .onAppear {
-                Task {
-                    await viewModel.fetchAlbums(for: artist.id)
-                    await viewModel.fetchGenres(for: artist.name)
-                }
+            .task {
+                await viewModel.fetchAlbums(for: artist.id)
+                await viewModel.fetchGenres(for: artist.name)
             }
-            BottomMenuView()
+
+            BottomMenuView() // se lo vuoi fisso sotto, meglio metterlo fuori dalla List
         }
     }
 }
@@ -135,9 +136,7 @@ struct AlbumRowView: View {
                 .padding(.leading, 8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
         }
-        Divider()
-            .padding(.horizontal)
+        
     }
 }

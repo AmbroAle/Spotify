@@ -19,7 +19,6 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity)
             }
             .background(.ultraThinMaterial)
-            .ignoresSafeArea(edges: .bottom)
         }
         .navigationBarBackButtonHidden(true)
     }
