@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED2405072E362BD40010177F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = ED2405062E362BD40010177F /* FirebaseStorage */; };
 		ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */; };
 		ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */; };
 		EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EDFD78802E27E5CA000D2EAF /* FirebaseAuth */; };
@@ -75,6 +76,7 @@
 				ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */,
 				ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */,
 				EDFD78832E27E5D0000D2EAF /* FirebaseCore in Frameworks */,
+				ED2405072E362BD40010177F /* FirebaseStorage in Frameworks */,
 				EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -148,6 +150,7 @@
 				EDFD78822E27E5D0000D2EAF /* FirebaseCore */,
 				ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */,
 				ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */,
+				ED2405062E362BD40010177F /* FirebaseStorage */,
 			);
 			productName = Spotify;
 			productReference = EDADB21E2E254D4400EF08CC /* Spotify.app */;
@@ -612,6 +615,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		ED2405062E362BD40010177F /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
 		ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EDD950692E27C685003C2580 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
