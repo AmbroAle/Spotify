@@ -20,7 +20,6 @@ class ProfileViewModel: ObservableObject {
         createImagesDirectoryIfNeeded()
     }
 
-    // MARK: - Gestione Profilo Firebase (mantiene funzionalità esistenti)
     
     func fetchUserProfile() {
         print("🔄 Inizio fetch profilo utente...")
@@ -121,7 +120,6 @@ class ProfileViewModel: ObservableObject {
         pickedImageData = imageData
         saveProfileImageLocally(imageData)
         
-        // Opzionale: salva anche su Firebase se l'utente è autenticato
         if Auth.auth().currentUser != nil {
             uploadToFirebaseAndUpdateProfile(imageData)
         }

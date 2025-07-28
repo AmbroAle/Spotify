@@ -14,7 +14,6 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            // Immagine profilo corrente
             ZStack(alignment: .bottomTrailing) {
                 profileImageView
                     .onTapGesture {
@@ -40,15 +39,6 @@ struct ProfileView: View {
             Text(viewModel.email)
                 .font(.subheadline)
                 .foregroundColor(.gray)
-
-            /*
-             if !viewModel.savedProfileImages.isEmpty {
-                Button("Foto Profilo Salvate (\(viewModel.savedProfileImages.count))") {
-                    showingSavedImages = true
-                }
-                .foregroundColor(.blue)
-                .padding(.top, 10)
-            }*/
 
             Divider().padding(.vertical, 20)
 
@@ -157,7 +147,6 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Cache Info View
 struct CacheInfoView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
