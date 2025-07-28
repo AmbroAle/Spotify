@@ -1,16 +1,9 @@
-//
-//  SavedProfileImagesView.swift
-//  Spotify
-//
-//  Created by Alex Frisoni on 28/07/25.
-//
-
 import SwiftUI
 
 struct SavedProfileImagesView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
-
+    
     var body: some View {
         NavigationView {
             List {
@@ -49,7 +42,7 @@ struct SavedProfileImageRow: View {
                     .foregroundColor(.gray)
                 HStack(spacing: 16) {
                     Button("Usa come profilo") {
-                        viewModel.setAsCurrentProfileImage(image.fileURL.path)
+                        viewModel.setAsCurrentProfileImage(image.localPath)
                     }
                     .font(.caption)
                     .foregroundColor(.blue)
@@ -65,18 +58,17 @@ struct SavedProfileImageRow: View {
         }
     }
 
+    @ViewBuilder
     private var profileImage: some View {
-        Group {
-            if let data = try? Data(contentsOf: image.fileURL),
-               let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Image("UserIconDarkMode")
-                    .resizable()
-                    .scaledToFill()
-            }
+        if let data = try? Data(contentsOf: image.fileURL),
+           let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+        } else {
+            Image("UserIconDarkMode")
+                .resizable()
+                .scaledToFill()
         }
     }
 }
