@@ -17,15 +17,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     return true
   }
 }
-
 @main
 struct SpotifyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
+    @StateObject var appViewModel = AppViewModel()
+
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            RootView()
+                .environmentObject(appViewModel)
                 .preferredColorScheme(.dark)
         }
     }
 }
+

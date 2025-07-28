@@ -4,14 +4,17 @@ import FirebaseStorage
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @EnvironmentObject var appViewModel: AppViewModel
     @State private var showingPhotoPicker = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var showingCameraPicker = false
     @State private var showingSourceActionSheet = false
+    @State private var showingSavedImages = false // per lo storico delle immagini profilo
+    @State private var showingChangePassword = false
 
     var body: some View {
         VStack(spacing: 20) {
-            // Immagine profilo tappabile con scelta sorgente immagine
+            // Immagine profilo corrente
             ZStack(alignment: .bottomTrailing) {
                 profileImageView
                     .onTapGesture {
@@ -38,26 +41,44 @@ struct ProfileView: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
 
+            // bottone per vedere foto profilo salvate
+            if !viewModel.savedProfileImages.isEmpty {
+                Button("Foto Profilo Salvate (\(viewModel.savedProfileImages.count))") {
+                    showingSavedImages = true
+                }
+                .foregroundColor(.blue)
+                .padding(.top, 10)
+            }
+
             Divider().padding(.vertical, 20)
 
-            // Voci per il profilo
+            // Voci per il profilo (codice esistente)
             VStack(spacing: 15) {
+                profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
+                    showingSavedImages = true
+                }
                 profileRow(icon: "gearshape.fill", text: "Impostazioni") {
-                    // probabilmente da rimuovere dato che lo faremo nella bottomBar
+                    // Da implementare
                 }
                 profileRow(icon: "lock.fill", text: "Privacy") {
-                    // Da vedere se si riesce ad implementare
+                    showingChangePassword = true
                 }
                 profileRow(icon: "rectangle.portrait.and.arrow.right", text: "Logout") {
-                    viewModel.logout()
-                    // Implementare
+                    appViewModel.logout()
                 }
             }
+            .sheet(isPresented: $showingChangePassword) {
+                ChangePasswordView()
+            }
+
             Spacer()
         }
         .padding()
         .onAppear {
             viewModel.fetchUserProfile()
+            Task {
+                await viewModel.fetchSavedProfileImages()
+            }
         }
         .photosPicker(isPresented: $showingPhotoPicker, selection: $selectedItem, matching: .images)
         .task(id: selectedItem) {
@@ -66,7 +87,6 @@ struct ProfileView: View {
                 viewModel.changeProfileImage(data)
             }
         }
-
         .sheet(isPresented: $showingCameraPicker) {
             CameraPicker { image in
                 if let data = image.jpegData(compressionQuality: 0.8) {
@@ -74,6 +94,9 @@ struct ProfileView: View {
                     viewModel.changeProfileImage(data)
                 }
             }
+        }
+        .sheet(isPresented: $showingSavedImages) {
+            SavedProfileImagesView(viewModel: viewModel)
         }
         .actionSheet(isPresented: $showingSourceActionSheet) {
             ActionSheet(title: Text("Seleziona sorgente immagine"), buttons: [
@@ -127,5 +150,67 @@ struct ProfileView: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SavedProfileImagesView: View {
+    @ObservedObject var viewModel: ProfileViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(viewModel.savedProfileImages) { image in
+                    HStack(spacing: 12) {
+                        AsyncImage(url: URL(string: image.imageURL)) { phase in
+                            switch phase {
+                            case .empty: ProgressView()
+                            case .success(let img): img.resizable().scaledToFill()
+                            case .failure: Image("UserIconDarkMode").resizable().scaledToFill()
+                            @unknown default: Image("UserIconDarkMode").resizable().scaledToFill()
+                            }
+                        }
+                        .frame(width: 60, height: 60)
+                        .clipShape(Circle())
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(image.description)
+                                .font(.headline)
+                                .lineLimit(2)
+                            
+                            Text(image.formattedDate)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            HStack(spacing: 16) {
+                                Button("Usa come profilo") {
+                                    viewModel.setAsCurrentProfileImage(image.imageURL)
+                                }
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                                
+                                Button("Elimina") {
+                                    viewModel.removeSavedProfileImage(image.id, imageURL: image.imageURL)
+                                }
+                                .font(.caption)
+                                .foregroundColor(.red)
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .navigationTitle("Foto Profilo Salvate")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Chiudi") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
