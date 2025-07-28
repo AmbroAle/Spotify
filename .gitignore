@@ -27,19 +27,6 @@ playground.xcworkspace
 Pods/
 *.xcworkspace
 
-# =======================
-# Carthage
-# =======================
-Carthage/Build/
-# Carthage/Checkouts
-
-# =======================
-# Fastlane
-# =======================
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output
 
 # =======================
 # Firebase
