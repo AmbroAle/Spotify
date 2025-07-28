@@ -14,7 +14,7 @@ struct RootView: View {
     var body: some View {
         Group {
             if appViewModel.isAuthenticated {
-                ProfileView()
+                HomeView()
                     .environmentObject(appViewModel)
             } else {
                 LoginView()
