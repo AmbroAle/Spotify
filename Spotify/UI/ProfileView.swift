@@ -1,6 +1,5 @@
 import SwiftUI
 import PhotosUI
-import FirebaseStorage
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
@@ -9,7 +8,7 @@ struct ProfileView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var showingCameraPicker = false
     @State private var showingSourceActionSheet = false
-    @State private var showingSavedImages = false // per lo storico delle immagini profilo
+    @State private var showingSavedImages = false
     @State private var showingChangePassword = false
 
     var body: some View {
@@ -41,7 +40,6 @@ struct ProfileView: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
 
-            // bottone per vedere foto profilo salvate
             if !viewModel.savedProfileImages.isEmpty {
                 Button("Foto Profilo Salvate (\(viewModel.savedProfileImages.count))") {
                     showingSavedImages = true
@@ -52,13 +50,12 @@ struct ProfileView: View {
 
             Divider().padding(.vertical, 20)
 
-            // Voci per il profilo (codice esistente)
             VStack(spacing: 15) {
                 profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
                     showingSavedImages = true
                 }
                 profileRow(icon: "gearshape.fill", text: "Impostazioni") {
-                    // Da implementare
+                    // TODO
                 }
                 profileRow(icon: "lock.fill", text: "Privacy") {
                     showingChangePassword = true
@@ -75,7 +72,6 @@ struct ProfileView: View {
         }
         .padding()
         .onAppear {
-            viewModel.fetchUserProfile()
             Task {
                 await viewModel.fetchSavedProfileImages()
             }
@@ -100,12 +96,8 @@ struct ProfileView: View {
         }
         .actionSheet(isPresented: $showingSourceActionSheet) {
             ActionSheet(title: Text("Seleziona sorgente immagine"), buttons: [
-                .default(Text("Libreria Foto")) {
-                    showingPhotoPicker = true
-                },
-                .default(Text("Fotocamera")) {
-                    showingCameraPicker = true
-                },
+                .default(Text("Libreria Foto")) { showingPhotoPicker = true },
+                .default(Text("Fotocamera")) { showingCameraPicker = true },
                 .cancel()
             ])
         }
@@ -115,19 +107,17 @@ struct ProfileView: View {
 
     @ViewBuilder
     private var profileImageView: some View {
-        if let imageData = viewModel.pickedImageData, let uiImage = UIImage(data: imageData) {
+        if let data = viewModel.pickedImageData, let uiImage = UIImage(data: data) {
             Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()
-        } else if let url = viewModel.userImageURL {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty: ProgressView()
-                case .success(let image): image.resizable().scaledToFill()
-                case .failure: Image("UserIconDarkMode").resizable().scaledToFill()
-                @unknown default: Image("UserIconDarkMode").resizable().scaledToFill()
-                }
-            }
+        } else if let localURL = viewModel.userImageURL,
+                  FileManager.default.fileExists(atPath: localURL.path),
+                  let data = try? Data(contentsOf: localURL),
+                  let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
         } else {
             Image("UserIconDarkMode")
                 .resizable()
@@ -153,7 +143,7 @@ struct ProfileView: View {
     }
 }
 
-struct SavedProfileImagesView: View {
+/*struct SavedProfileImagesView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
     
@@ -162,41 +152,42 @@ struct SavedProfileImagesView: View {
             List {
                 ForEach(viewModel.savedProfileImages) { image in
                     HStack(spacing: 12) {
-                        AsyncImage(url: URL(string: image.imageURL)) { phase in
-                            switch phase {
-                            case .empty: ProgressView()
-                            case .success(let img): img.resizable().scaledToFill()
-                            case .failure: Image("UserIconDarkMode").resizable().scaledToFill()
-                            @unknown default: Image("UserIconDarkMode").resizable().scaledToFill()
-                            }
+                        if let data = try? Data(contentsOf: image.fileURL),
+                           let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
+                        } else {
+                            Image("UserIconDarkMode")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
                         }
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(image.description)
                                 .font(.headline)
                                 .lineLimit(2)
-                            
                             Text(image.formattedDate)
                                 .font(.caption)
                                 .foregroundColor(.gray)
-                            
                             HStack(spacing: 16) {
                                 Button("Usa come profilo") {
-                                    viewModel.setAsCurrentProfileImage(image.imageURL)
+                                    viewModel.setAsCurrentProfileImage(image.fileURL.path)
                                 }
                                 .font(.caption)
                                 .foregroundColor(.blue)
                                 
                                 Button("Elimina") {
-                                    viewModel.removeSavedProfileImage(image.id, imageURL: image.imageURL)
+                                    viewModel.removeSavedProfileImage(image.id, localPath: image.localPath)
                                 }
                                 .font(.caption)
                                 .foregroundColor(.red)
                             }
                         }
-                        
                         Spacer()
                     }
                     .padding(.vertical, 4)
@@ -206,11 +197,10 @@ struct SavedProfileImagesView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Chiudi") {
-                        dismiss()
-                    }
+                    Button("Chiudi") { dismiss() }
                 }
             }
         }
     }
 }
+ */

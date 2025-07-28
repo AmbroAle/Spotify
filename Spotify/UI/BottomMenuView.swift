@@ -1,8 +1,9 @@
 import SwiftUI
 
+//controllare perchè cambia leggeremente il colore quando cambi pagine con home
 struct BottomMenuView: View {
     let barHeight: CGFloat = 60
-
+    
     var body: some View {
         HStack(spacing: 40) {
             NavigationLink(destination: HomeView()) {
