@@ -2,7 +2,6 @@ import Foundation
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
-import FirebaseStorage
 
 @MainActor
 class ProfileViewModel: ObservableObject {
@@ -19,10 +18,9 @@ class ProfileViewModel: ObservableObject {
     init() {
         createImagesDirectoryIfNeeded()
     }
-
     
     func fetchUserProfile() {
-        print("🔄 Inizio fetch profilo utente...")
+        print("Inizio fetch profilo utente...")
         
         guard let currentUser = Auth.auth().currentUser else {
             print("Nessun utente autenticato")
@@ -49,7 +47,7 @@ class ProfileViewModel: ObservableObject {
                 }
                 return
             }
-
+            
             if let doc = document, doc.exists {
                 print("Documento utente trovato")
                 let data = doc.data()
@@ -66,17 +64,7 @@ class ProfileViewModel: ObservableObject {
                     self.email = fetchedEmail
                     print("Username e email aggiornati sulla UI")
                 }
-
-                if let urlString = data?["profileImageURL"] as? String, !urlString.isEmpty,
-                   let url = URL(string: urlString) {
-                    print("URL immagine profilo trovato: \(urlString)")
-                    Task { @MainActor in
-                        self.userImageURL = url
-                    }
-                } else {
-                    print("Nessuna immagine profilo Firebase, controllo locale...")
-                    self.loadLastLocalImage()
-                }
+                self.loadLastLocalImage()
             } else {
                 print("Documento utente non trovato, creazione automatica...")
                 self.createMissingUserDocument(currentUser)
@@ -93,8 +81,7 @@ class ProfileViewModel: ObservableObject {
         let userData: [String: Any] = [
             "username": username,
             "email": email,
-            "createdAt": Timestamp(date: Date()),
-            "profileImageURL": ""
+            "createdAt": Timestamp(date: Date())
         ]
         
         db.collection("users").document(user.uid).setData(userData) { [weak self] error in
@@ -114,15 +101,9 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Gestione Immagini Locali (nuova funzionalità)
-
     func changeProfileImage(_ imageData: Data) {
         pickedImageData = imageData
         saveProfileImageLocally(imageData)
-        
-        if Auth.auth().currentUser != nil {
-            uploadToFirebaseAndUpdateProfile(imageData)
-        }
     }
 
     private func saveProfileImageLocally(_ imageData: Data) {
@@ -131,45 +112,22 @@ class ProfileViewModel: ObservableObject {
         
         guard let dirURL = getImagesDirectoryURL() else { return }
         let fileURL = dirURL.appendingPathComponent(fileName)
-
+        
         do {
             try imageData.write(to: fileURL)
             print("Immagine salvata localmente in: \(fileURL.path)")
-
+            
             let imageMeta = ProfileImageData(
                 id: fileName,
                 localPath: fileURL.path,
                 description: "Foto profilo del \(formattedDate(from: Date()))",
                 timestamp: Date()
             )
-
+            
             savedProfileImages.insert(imageMeta, at: 0)
             userImageURL = fileURL
-
         } catch {
             print("Errore salvataggio immagine locale: \(error)")
-        }
-    }
-    
-    private func uploadToFirebaseAndUpdateProfile(_ imageData: Data) {
-        Task {
-            do {
-                let url = try await uploadImageToStorage(imageData, userID: Auth.auth().currentUser?.uid ?? "")
-                await updateFirebaseProfileImageURL(url.absoluteString)
-            } catch {
-                print("Errore upload Firebase: \(error)")
-            }
-        }
-    }
-    
-    private func updateFirebaseProfileImageURL(_ urlString: String) async {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-        
-        do {
-            try await db.collection("users").document(userID).updateData(["profileImageURL": urlString])
-            print("URL profilo aggiornato su Firebase")
-        } catch {
-            print("Errore aggiornamento Firebase: \(error)")
         }
     }
 
@@ -192,7 +150,7 @@ class ProfileViewModel: ObservableObject {
                     timestamp: creationDate
                 )
             }.sorted(by: { $0.timestamp > $1.timestamp })
-
+            
             savedProfileImages = images
             
         } catch {
@@ -202,23 +160,12 @@ class ProfileViewModel: ObservableObject {
     }
 
     func setAsCurrentProfileImage(_ path: String) {
-        // Verifica se è un path locale o un URL Firebase
-        if path.hasPrefix("http") {
-            // È un URL Firebase
-            userImageURL = URL(string: path)
-            if Auth.auth().currentUser != nil {
-                Task {
-                    await updateFirebaseProfileImageURL(path)
-                }
-            }
-        } else {
-            // È un path locale
-            guard fileManager.fileExists(atPath: path) else {
-                print("File immagine non trovato: \(path)")
-                return
-            }
-            userImageURL = URL(fileURLWithPath: path)
+        guard fileManager.fileExists(atPath: path) else {
+            print("File immagine non trovato: \(path)")
+            return
         }
+        
+        userImageURL = URL(fileURLWithPath: path)
     }
 
     func removeSavedProfileImage(_ id: String) {
@@ -248,7 +195,6 @@ class ProfileViewModel: ObservableObject {
     }
 
     // MARK: - Gestione Directory e Utility
-
     private func createImagesDirectoryIfNeeded() {
         guard let dirURL = getImagesDirectoryURL() else { return }
         
@@ -311,16 +257,6 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
-    private func uploadImageToStorage(_ imageData: Data, userID: String) async throws -> URL {
-        let storageRef = Storage.storage().reference()
-        let timestamp = Date().timeIntervalSince1970
-        let imageRef = storageRef.child("profileImages/\(userID)/\(timestamp).jpg")
-        
-        let _ = try await imageRef.putDataAsync(imageData)
-        let downloadURL = try await imageRef.downloadURL()
-        return downloadURL
-    }
-
     private func formattedDate(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -328,7 +264,6 @@ class ProfileViewModel: ObservableObject {
         formatter.locale = Locale(identifier: "it_IT")
         return formatter.string(from: date)
     }
-
     func logout() {
         do {
             try Auth.auth().signOut()
@@ -348,7 +283,7 @@ struct ProfileImageData: Identifiable, Codable {
     var fileURL: URL {
         URL(fileURLWithPath: localPath)
     }
-
+    
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

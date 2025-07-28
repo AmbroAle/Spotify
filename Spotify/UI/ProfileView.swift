@@ -14,6 +14,7 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(spacing: 20) {
+            // Immagine profilo corrente
             ZStack(alignment: .bottomTrailing) {
                 profileImageView
                     .onTapGesture {
@@ -42,23 +43,20 @@ struct ProfileView: View {
 
             Divider().padding(.vertical, 20)
 
+            // Voci per il profilo
             VStack(spacing: 15) {
                 profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
                     showingSavedImages = true
                 }
-                
                 profileRow(icon: "externaldrive.fill", text: "Info Cache (\(viewModel.getCacheSize()))") {
                     showingCacheInfo = true
                 }
-                
                 profileRow(icon: "gearshape.fill", text: "Impostazioni") {
-                    // TODO
+                    // Da implementare
                 }
-                
                 profileRow(icon: "lock.fill", text: "Privacy") {
                     showingChangePassword = true
                 }
-                
                 profileRow(icon: "rectangle.portrait.and.arrow.right", text: "Logout") {
                     appViewModel.logout()
                 }
@@ -74,8 +72,7 @@ struct ProfileView: View {
         }
         .padding()
         .onAppear {
-            viewModel.fetchUserProfile()//con await da warning?
-            
+            viewModel.fetchUserProfile()
             Task {
                 await viewModel.fetchSavedProfileImages()
             }
@@ -100,8 +97,12 @@ struct ProfileView: View {
         }
         .actionSheet(isPresented: $showingSourceActionSheet) {
             ActionSheet(title: Text("Seleziona sorgente immagine"), buttons: [
-                .default(Text("Libreria Foto")) { showingPhotoPicker = true },
-                .default(Text("Fotocamera")) { showingCameraPicker = true },
+                .default(Text("Libreria Foto")) {
+                    showingPhotoPicker = true
+                },
+                .default(Text("Fotocamera")) {
+                    showingCameraPicker = true
+                },
                 .cancel()
             ])
         }
@@ -111,17 +112,19 @@ struct ProfileView: View {
 
     @ViewBuilder
     private var profileImageView: some View {
-        if let data = viewModel.pickedImageData, let uiImage = UIImage(data: data) {
+        if let imageData = viewModel.pickedImageData, let uiImage = UIImage(data: imageData) {
             Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()
-        } else if let localURL = viewModel.userImageURL,
-                  FileManager.default.fileExists(atPath: localURL.path),
-                  let data = try? Data(contentsOf: localURL),
-                  let uiImage = UIImage(data: data) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFill()
+        } else if let url = viewModel.userImageURL {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty: ProgressView()
+                case .success(let image): image.resizable().scaledToFill()
+                case .failure: Image("UserIconDarkMode").resizable().scaledToFill()
+                @unknown default: Image("UserIconDarkMode").resizable().scaledToFill()
+                }
+            }
         } else {
             Image("UserIconDarkMode")
                 .resizable()
@@ -146,7 +149,6 @@ struct ProfileView: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
-
 struct CacheInfoView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
