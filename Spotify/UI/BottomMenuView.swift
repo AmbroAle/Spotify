@@ -2,17 +2,26 @@ import SwiftUI
 
 //controllare perchè cambia leggeremente il colore quando cambi pagine con home
 struct BottomMenuView: View {
+    @EnvironmentObject var navigationManager: NavigationManager
     let barHeight: CGFloat = 60
     
     var body: some View {
         HStack(spacing: 40) {
-            NavigationLink(destination: HomeView()) {
+            Button {
+                navigationManager.goTo(.home)
+            } label: {
                 menuItem(icon: "house.fill", label: "Home")
             }
-            NavigationLink(destination: Text("Libreria")) {
+
+            Button {
+                navigationManager.goTo(.library)
+            } label: {
                 menuItem(icon: "books.vertical.fill", label: "La tua libreria")
             }
-            NavigationLink(destination: Text("Crea")) {
+
+            Button {
+                navigationManager.goTo(.create)
+            } label: {
                 menuItem(icon: "plus.circle.fill", label: "Crea")
             }
         }

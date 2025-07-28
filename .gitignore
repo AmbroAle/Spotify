@@ -1,0 +1,34 @@
+# =======================
+# Xcode
+# =======================
+xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# =======================
+# Swift Package Manager
+# =======================
+.build/
+# Packages/
+# Package.pins
+# Package.resolved
+# *.xcodeproj
+# .swiftpm
+
+# =======================
+# CocoaPods
+# =======================
+Pods/
+*.xcworkspace
+
+
+# =======================
+# Firebase
+# =======================
+GoogleService-Info.plist

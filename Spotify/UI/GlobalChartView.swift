@@ -58,7 +58,6 @@ struct GlobalChartView: View {
             .listStyle(.plain)
             .listRowSeparator(.hidden)
 
-            BottomMenuView()
         }
         .navigationTitle("Top Global")
         .task {
