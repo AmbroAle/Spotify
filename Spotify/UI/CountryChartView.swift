@@ -57,8 +57,6 @@ struct CountryChartView: View {
             }
             .listStyle(.plain)
             .listRowSeparator(.hidden)
-
-            BottomMenuView()
         }
         .navigationTitle("Top \(country)")
         .task {

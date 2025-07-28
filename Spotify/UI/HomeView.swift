@@ -15,8 +15,6 @@ struct HomeView: View {
                 contentView(for: selectedTab)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                BottomMenuView()
-                    .frame(maxWidth: .infinity)
             }
             .background(.ultraThinMaterial)
         }

@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9551F2702E35923B00DC87D7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9551F26F2E35923B00DC87D7 /* FirebaseStorage */; };
 		9551F2722E35926600DC87D7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9551F2712E35926600DC87D7 /* FirebaseStorage */; };
-		ED2405072E362BD40010177F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = ED2405062E362BD40010177F /* FirebaseStorage */; };
+		ED2405072E362BD40010177F /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		ED2405AC2E37C1950010177F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9551F26F2E35923B00DC87D7 /* FirebaseStorage */; };
 		ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7B92E30E59B00F3D68C /* FirebaseDatabase */; };
 		ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */; };
 		EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EDFD78802E27E5CA000D2EAF /* FirebaseAuth */; };
@@ -75,10 +75,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED2405AC2E37C1950010177F /* FirebaseStorage in Frameworks */,
 				ED98A7BA2E30E59B00F3D68C /* FirebaseDatabase in Frameworks */,
 				ED98A7BC2E30E5BC00F3D68C /* FirebaseFirestore in Frameworks */,
 				EDFD78832E27E5D0000D2EAF /* FirebaseCore in Frameworks */,
-				ED2405072E362BD40010177F /* FirebaseStorage in Frameworks */,
+				ED2405072E362BD40010177F /* (null) in Frameworks */,
 				EDFD78812E27E5CA000D2EAF /* FirebaseAuth in Frameworks */,
 				9551F2722E35926600DC87D7 /* FirebaseStorage in Frameworks */,
 			);
@@ -155,7 +156,6 @@
 				ED98A7BB2E30E5BC00F3D68C /* FirebaseFirestore */,
 				9551F26F2E35923B00DC87D7 /* FirebaseStorage */,
 				9551F2712E35926600DC87D7 /* FirebaseStorage */,
-				ED2405062E362BD40010177F /* FirebaseStorage */,
 			);
 			productName = Spotify;
 			productReference = EDADB21E2E254D4400EF08CC /* Spotify.app */;

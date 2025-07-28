@@ -1,4 +1,3 @@
-// 👇 Incolla QUESTO PRIMA di `struct ArtistView`
 
 import SwiftUI
 

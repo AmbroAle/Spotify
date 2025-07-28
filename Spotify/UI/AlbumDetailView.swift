@@ -32,6 +32,5 @@ struct AlbumDetailView: View {
             }
         }
 
-        BottomMenuView()
     }
 }

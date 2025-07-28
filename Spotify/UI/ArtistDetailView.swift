@@ -78,8 +78,6 @@ struct ArtistDetailView: View {
                         }
                     }
                 }
-
-                BottomMenuView()
             }
             .task {
                 await viewModel.fetchAlbums(for: artist.id)
