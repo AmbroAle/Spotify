@@ -1,35 +1,35 @@
-//
-//  BottomMenuView.swift
-//  Spotify
-//
-//  Created by Alessandro Ambrogiani on 20/07/25.
-//
 import SwiftUI
 
 struct BottomMenuView: View {
+    let barHeight: CGFloat = 60
+
     var body: some View {
         HStack(spacing: 40) {
-            VStack {
-                Image(systemName: "house.fill")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                Text("Home").font(.caption2)
+            NavigationLink(destination: HomeView()) {
+                menuItem(icon: "house.fill", label: "Home")
             }
-            VStack {
-                Image(systemName: "magnifyingglass")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                Text("Cerca").font(.caption2)
+            NavigationLink(destination: Text("Libreria")) {
+                menuItem(icon: "books.vertical.fill", label: "La tua libreria")
             }
-            VStack {
-                Image(systemName: "gear")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                Text("Impostazioni").font(.caption2)
+            NavigationLink(destination: Text("Crea")) {
+                menuItem(icon: "plus.circle.fill", label: "Crea")
             }
         }
-        .padding()
+        .frame(height: barHeight)
         .frame(maxWidth: .infinity)
-        .background(Color.gray.opacity(0.1))
+        .background(.ultraThinMaterial)
+    }
+
+    private func menuItem(icon: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 24)
+            Text(label)
+                .font(.caption2)
+        }
+        .frame(maxWidth: .infinity)
+        .foregroundColor(.primary)
     }
 }
