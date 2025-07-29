@@ -149,6 +149,8 @@ struct ProfileView: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
+
+// MARK: - Cache Info View
 struct CacheInfoView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
