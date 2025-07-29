@@ -35,13 +35,6 @@ class ProfileViewModel: ObservableObject {
         userDocRef.getDocument { [weak self] document, error in
             guard let self = self else { return }
             
-            if let error = error {
-                Task { @MainActor in
-                    self.username = "Errore caricamento"
-                }
-                return
-            }
-            
             if let doc = document, doc.exists {
                 let data = doc.data()
                 
