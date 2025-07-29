@@ -1,7 +1,7 @@
 import Foundation
+import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
-import FirebaseStorage
 
 @MainActor
 class ProfileViewModel: ObservableObject {
@@ -9,14 +9,18 @@ class ProfileViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var userImageURL: URL?
     @Published var pickedImageData: Data?
-    @Published var savedProfileImages: [ProfileImageData] = [] //storico foto profilo
+    @Published var savedProfileImages: [ProfileImageData] = []
 
     private let db = Firestore.firestore()
+    private let fileManager = FileManager.default
+    private let imageFolderName = "ProfileImages"
 
-    // MARK: - Gestione Profilo Base (codice esistente)
+    init() {
+        createImagesDirectoryIfNeeded()
+    }
     
     func fetchUserProfile() {
-        print("🔄 Inizio fetch profilo utente...")
+        print("Inizio fetch profilo utente...")
         
         guard let currentUser = Auth.auth().currentUser else {
             print("Nessun utente autenticato")
@@ -26,33 +30,41 @@ class ProfileViewModel: ObservableObject {
             return
         }
         
-        print("🔍 Recupero dati per UID: \(currentUser.uid)")
+        print("Recupero dati per UID: \(currentUser.uid)")
+        print("Email utente corrente: \(currentUser.email ?? "N/A")")
         
         let userDocRef = db.collection("users").document(currentUser.uid)
         userDocRef.getDocument { [weak self] document, error in
-            guard let self = self else { return }
+            guard let self = self else {
+                print("Self è nil")
+                return
+            }
             
             if let error = error {
                 print("Errore fetch profilo: \(error.localizedDescription)")
-                self.username = "Errore caricamento"
+                Task { @MainActor in
+                    self.username = "Errore caricamento"
+                }
                 return
             }
-
+            
             if let doc = document, doc.exists {
                 print("Documento utente trovato")
                 let data = doc.data()
-                print("📄 Dati ricevuti: \(data ?? [:])")
+                print("Dati ricevuti: \(data ?? [:])")
                 
-                self.username = data?["username"] as? String ?? "Sconosciuto"
-                self.email = data?["email"] as? String ?? currentUser.email ?? ""
-
-                if let urlString = data?["profileImageURL"] as? String, !urlString.isEmpty,
-                   let url = URL(string: urlString) {
-                    self.userImageURL = url
-                    print("URL immagine profilo trovato: \(urlString)")
-                } else {
-                    print("Nessuna immagine profilo trovata")
+                let fetchedUsername = data?["username"] as? String ?? "Sconosciuto"
+                let fetchedEmail = data?["email"] as? String ?? currentUser.email ?? ""
+                
+                print("Username estratto: '\(fetchedUsername)'")
+                print("Email estratta: '\(fetchedEmail)'")
+                
+                Task { @MainActor in
+                    self.username = fetchedUsername
+                    self.email = fetchedEmail
+                    print("Username e email aggiornati sulla UI")
                 }
+                self.loadLastLocalImage()
             } else {
                 print("Documento utente non trovato, creazione automatica...")
                 self.createMissingUserDocument(currentUser)
@@ -64,25 +76,194 @@ class ProfileViewModel: ObservableObject {
         let email = user.email ?? ""
         let username = String(email.split(separator: "@").first ?? "Utente")
         
+        print("🆕 Creazione documento per utente: \(username)")
+        
         let userData: [String: Any] = [
             "username": username,
             "email": email,
-            "createdAt": Timestamp(date: Date()),
-            "profileImageURL": ""
+            "createdAt": Timestamp(date: Date())
         ]
         
         db.collection("users").document(user.uid).setData(userData) { [weak self] error in
             if let error = error {
                 print("Errore creazione documento utente: \(error.localizedDescription)")
-                self?.username = "Errore"
+                Task { @MainActor in
+                    self?.username = "Errore"
+                }
             } else {
-                print("Documento utente creato automaticamente")
-                self?.username = username
-                self?.email = email
+                print("Documento utente creato automaticamente con username: \(username)")
+                Task { @MainActor in
+                    self?.username = username
+                    self?.email = email
+                    print("Username aggiornato sulla UI: \(username)")
+                }
             }
         }
     }
 
+    func changeProfileImage(_ imageData: Data) {
+        pickedImageData = imageData
+        saveProfileImageLocally(imageData)
+    }
+
+    private func saveProfileImageLocally(_ imageData: Data) {
+        let timestamp = Date().timeIntervalSince1970
+        let fileName = "profile_\(UUID().uuidString)_\(timestamp).jpg"
+        
+        guard let dirURL = getImagesDirectoryURL() else { return }
+        let fileURL = dirURL.appendingPathComponent(fileName)
+        
+        do {
+            try imageData.write(to: fileURL)
+            print("Immagine salvata localmente in: \(fileURL.path)")
+            
+            let imageMeta = ProfileImageData(
+                id: fileName,
+                localPath: fileURL.path,
+                description: "Foto profilo del \(formattedDate(from: Date()))",
+                timestamp: Date()
+            )
+            
+            savedProfileImages.insert(imageMeta, at: 0)
+            userImageURL = fileURL
+        } catch {
+            print("Errore salvataggio immagine locale: \(error)")
+        }
+    }
+
+    func fetchSavedProfileImages() async {
+        guard let dirURL = getImagesDirectoryURL() else { return }
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: dirURL, includingPropertiesForKeys: [.creationDateKey])
+            
+            let images = contents.compactMap { url -> ProfileImageData? in
+                guard fileManager.fileExists(atPath: url.path) else { return nil }
+                
+                let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+                let creationDate = attributes?[.creationDate] as? Date ?? Date()
+                
+                return ProfileImageData(
+                    id: url.lastPathComponent,
+                    localPath: url.path,
+                    description: "Foto profilo salvata",
+                    timestamp: creationDate
+                )
+            }.sorted(by: { $0.timestamp > $1.timestamp })
+            
+            savedProfileImages = images
+            
+        } catch {
+            print("Errore caricamento immagini locali: \(error)")
+            savedProfileImages = []
+        }
+    }
+
+    func setAsCurrentProfileImage(_ path: String) {
+        guard fileManager.fileExists(atPath: path) else {
+            print("File immagine non trovato: \(path)")
+            return
+        }
+        
+        userImageURL = URL(fileURLWithPath: path)
+    }
+
+    func removeSavedProfileImage(_ id: String) {
+        guard let imageToDelete = savedProfileImages.first(where: { $0.id == id }) else { return }
+        
+        do {
+            try fileManager.removeItem(atPath: imageToDelete.localPath)
+            savedProfileImages.removeAll { $0.id == id }
+            
+            if userImageURL?.path == imageToDelete.localPath {
+                userImageURL = nil
+            }
+            
+            print("Immagine rimossa: \(imageToDelete.localPath)")
+        } catch {
+            print("Errore rimozione immagine: \(error)")
+        }
+    }
+    
+    private func loadLastLocalImage() {
+        Task {
+            await fetchSavedProfileImages()
+            if let lastImage = savedProfileImages.first {
+                userImageURL = URL(fileURLWithPath: lastImage.localPath)
+            }
+        }
+    }
+
+    // MARK: - Gestione Directory e Utility
+    private func createImagesDirectoryIfNeeded() {
+        guard let dirURL = getImagesDirectoryURL() else { return }
+        
+        if !fileManager.fileExists(atPath: dirURL.path) {
+            do {
+                try fileManager.createDirectory(at: dirURL, withIntermediateDirectories: true, attributes: nil)
+                print("Cartella immagini creata: \(dirURL.path)")
+            } catch {
+                print("Errore creazione cartella immagini: \(error)")
+            }
+        }
+    }
+
+    private func getImagesDirectoryURL() -> URL? {
+        let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
+        return base?.appendingPathComponent(imageFolderName)
+    }
+
+    func cleanOldImages(olderThan days: Int = 30) {
+        guard let dirURL = getImagesDirectoryURL() else { return }
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: dirURL, includingPropertiesForKeys: [.creationDateKey])
+            let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+            
+            for fileURL in contents {
+                let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
+                if let creationDate = attributes[.creationDate] as? Date,
+                   creationDate < cutoffDate {
+                    try fileManager.removeItem(at: fileURL)
+                    print("Rimossa immagine vecchia: \(fileURL.lastPathComponent)")
+                }
+            }
+            
+            Task {
+                await fetchSavedProfileImages()
+            }
+            
+        } catch {
+            print("Errore pulizia immagini: \(error)")
+        }
+    }
+
+    func getCacheSize() -> String {
+        guard let dirURL = getImagesDirectoryURL() else { return "0 KB" }
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: dirURL, includingPropertiesForKeys: [.fileSizeKey])
+            let totalSize: Int64 = contents.reduce(0) { total, url in
+                let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+                let fileSize = attributes?[.size] as? Int64 ?? 0
+                return total + fileSize
+            }
+            
+            return ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
+            
+        } catch {
+            print("Errore calcolo dimensione cache: \(error)")
+            return "N/A"
+        }
+    }
+
+    private func formattedDate(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        formatter.locale = Locale(identifier: "it_IT")
+        return formatter.string(from: date)
+    }
     func logout() {
         do {
             try Auth.auth().signOut()
@@ -91,185 +272,23 @@ class ProfileViewModel: ObservableObject {
             print("Errore logout: \(error.localizedDescription)")
         }
     }
-
-    // MARK: - Gestione Foto Profilo (nuovo pattern simile ad AlbumDetailViewModel)
-    
-    func saveProfileImage(_ imageData: Data, description: String = "") {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-
-        Task {
-            do {
-                // 1. Upload immagine su Storage
-                let imageURL = try await uploadImageToStorage(imageData, userID: userID)
-                
-                // 2. Salva metadata nel database (stesso pattern delle tracce)
-                let imageMetadata: [String: Any] = [
-                    "imageURL": imageURL.absoluteString,
-                    "description": description.isEmpty ? "Foto profilo del \(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))" : description,
-                    "timestamp": Timestamp(date: Date()),
-                    "userID": userID
-                ]
-                
-                let documentID = "\(Date().timeIntervalSince1970)"
-                
-                db.collection("users")
-                    .document(userID)
-                    .collection("profileImages")
-                    .document(documentID)
-                    .setData(imageMetadata) { [weak self] error in
-                        if let error = error {
-                            print("Errore salvataggio foto profilo: \(error.localizedDescription)")
-                        } else {
-                            print("Foto profilo salvata con successo")
-                            // Refresh della lista
-                            Task { @MainActor in
-                                await self?.fetchSavedProfileImages()
-                            }
-                        }
-                    }
-                
-            } catch {
-                print("Errore upload foto profilo: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    func removeSavedProfileImage(_ documentID: String, imageURL: String) {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-
-        db.collection("users")
-            .document(userID)
-            .collection("profileImages")
-            .document(documentID)
-            .delete { [weak self] error in
-                if let error = error {
-                    print("Errore rimozione foto profilo: \(error)")
-                } else {
-                    print("Foto profilo rimossa dal database")
-                    // Rimuovi anche da Storage
-                    self?.deleteImageFromStorage(imageURL)
-                    // Refresh della lista
-                    Task { @MainActor in
-                        await self?.fetchSavedProfileImages()
-                    }
-                }
-            }
-    }
-    
-    func fetchSavedProfileImages() async {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-
-        db.collection("users")
-            .document(userID)
-            .collection("profileImages")
-            .order(by: "timestamp", descending: true)
-            .getDocuments { [weak self] snapshot, error in
-                if let error = error {
-                    print("Errore caricamento foto profilo salvate: \(error)")
-                    return
-                }
-
-                guard let documents = snapshot?.documents else { return }
-                let images = documents.compactMap { doc -> ProfileImageData? in
-                    let data = doc.data()
-                    guard let imageURL = data["imageURL"] as? String,
-                          let timestamp = data["timestamp"] as? Timestamp else { return nil }
-                    
-                    return ProfileImageData(
-                        id: doc.documentID,
-                        imageURL: imageURL,
-                        description: data["description"] as? String ?? "",
-                        timestamp: timestamp
-                    )
-                }
-
-                Task { @MainActor in
-                    self?.savedProfileImages = images
-                }
-            }
-    }
-    
-    func setAsCurrentProfileImage(_ imageURL: String) {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-        
-        db.collection("users")
-            .document(userID)
-            .updateData(["profileImageURL": imageURL]) { [weak self] error in
-                if let error = error {
-                    print("Errore impostazione foto profilo corrente: \(error.localizedDescription)")
-                } else {
-                    print("Foto profilo corrente aggiornata")
-                    Task { @MainActor in
-                        self?.userImageURL = URL(string: imageURL)
-                    }
-                }
-            }
-    }
-
-    // MARK: - Funzioni esistenti (mantenute per compatibilità)
-    
-    func uploadProfileImage(_ imageData: Data) async throws -> URL {
-        return try await uploadImageToStorage(imageData, userID: Auth.auth().currentUser?.uid ?? "")
-    }
-
-    func updateProfileImageURL(_ url: URL) {
-        setAsCurrentProfileImage(url.absoluteString)
-    }
-
-    func changeProfileImage(_ imageData: Data) {
-        Task {
-            do {
-                // Upload immagine e ottieni URL
-                let url = try await uploadProfileImage(imageData)
-
-                // Aggiorna immagine profilo corrente
-                updateProfileImageURL(url)
-
-                // Salva nel database lo storico
-                saveProfileImage(imageData)
-            } catch {
-                print("Errore upload immagine: \(error)")
-            }
-        }
-    }
-
-    
-    // MARK: - Helper Functions Private
-    
-    private func uploadImageToStorage(_ imageData: Data, userID: String) async throws -> URL {
-        let storageRef = Storage.storage().reference()
-        let timestamp = Date().timeIntervalSince1970
-        let imageRef = storageRef.child("profileImages/\(userID)/\(timestamp).jpg")
-        
-        let _ = try await imageRef.putDataAsync(imageData)
-        let downloadURL = try await imageRef.downloadURL()
-        return downloadURL
-    }
-    
-    private func deleteImageFromStorage(_ imageURL: String) {
-        let storageRef = Storage.storage().reference(forURL: imageURL)
-        
-        storageRef.delete { error in
-            if let error = error {
-                print("Errore eliminazione immagine da Storage: \(error.localizedDescription)")
-            } else {
-                print("Immagine eliminata da Storage")
-            }
-        }
-    }
 }
 
-// MARK: - Struttura Dati
 struct ProfileImageData: Identifiable, Codable {
     let id: String
-    let imageURL: String
+    let localPath: String
     let description: String
-    let timestamp: Timestamp
+    let timestamp: Date
+    
+    var fileURL: URL {
+        URL(fileURLWithPath: localPath)
+    }
     
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
-        return formatter.string(from: timestamp.dateValue())
+        formatter.locale = Locale(identifier: "it_IT")
+        return formatter.string(from: timestamp)
     }
 }

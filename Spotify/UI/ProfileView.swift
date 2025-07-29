@@ -1,6 +1,5 @@
 import SwiftUI
 import PhotosUI
-import FirebaseStorage
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
@@ -9,8 +8,9 @@ struct ProfileView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var showingCameraPicker = false
     @State private var showingSourceActionSheet = false
-    @State private var showingSavedImages = false // per lo storico delle immagini profilo
+    @State private var showingSavedImages = false
     @State private var showingChangePassword = false
+    @State private var showingCacheInfo = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -41,21 +41,15 @@ struct ProfileView: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
 
-            // bottone per vedere foto profilo salvate
-            if !viewModel.savedProfileImages.isEmpty {
-                Button("Foto Profilo Salvate (\(viewModel.savedProfileImages.count))") {
-                    showingSavedImages = true
-                }
-                .foregroundColor(.blue)
-                .padding(.top, 10)
-            }
-
             Divider().padding(.vertical, 20)
 
-            // Voci per il profilo (codice esistente)
+            // Voci per il profilo
             VStack(spacing: 15) {
                 profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
                     showingSavedImages = true
+                }
+                profileRow(icon: "externaldrive.fill", text: "Info Cache (\(viewModel.getCacheSize()))") {
+                    showingCacheInfo = true
                 }
                 profileRow(icon: "gearshape.fill", text: "Impostazioni") {
                     // Da implementare
@@ -69,6 +63,9 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingChangePassword) {
                 ChangePasswordView()
+            }
+            .sheet(isPresented: $showingCacheInfo) {
+                CacheInfoView(viewModel: viewModel)
             }
 
             Spacer()
@@ -152,64 +149,57 @@ struct ProfileView: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
-
-struct SavedProfileImagesView: View {
+struct CacheInfoView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showingCleanAlert = false
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(viewModel.savedProfileImages) { image in
-                    HStack(spacing: 12) {
-                        AsyncImage(url: URL(string: image.imageURL)) { phase in
-                            switch phase {
-                            case .empty: ProgressView()
-                            case .success(let img): img.resizable().scaledToFill()
-                            case .failure: Image("UserIconDarkMode").resizable().scaledToFill()
-                            @unknown default: Image("UserIconDarkMode").resizable().scaledToFill()
-                            }
-                        }
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(image.description)
-                                .font(.headline)
-                                .lineLimit(2)
-                            
-                            Text(image.formattedDate)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            
-                            HStack(spacing: 16) {
-                                Button("Usa come profilo") {
-                                    viewModel.setAsCurrentProfileImage(image.imageURL)
-                                }
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                                
-                                Button("Elimina") {
-                                    viewModel.removeSavedProfileImage(image.id, imageURL: image.imageURL)
-                                }
-                                .font(.caption)
-                                .foregroundColor(.red)
-                            }
-                        }
-                        
+                Section("Informazioni Cache") {
+                    HStack {
+                        Text("Dimensione totale")
                         Spacer()
+                        Text(viewModel.getCacheSize())
+                            .foregroundColor(.secondary)
                     }
-                    .padding(.vertical, 4)
+                    
+                    HStack {
+                        Text("Numero immagini")
+                        Spacer()
+                        Text("\(viewModel.savedProfileImages.count)")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Section("Gestione Cache") {
+                    Button("Pulisci immagini vecchie (30+ giorni)") {
+                        showingCleanAlert = true
+                    }
+                    .foregroundColor(.orange)
+                }
+                
+                Section("Note") {
+                    Text("Le immagini del profilo sono salvate localmente sul dispositivo e non vengono sincronizzate. La pulizia automatica rimuove le immagini più vecchie di 30 giorni.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
-            .navigationTitle("Foto Profilo Salvate")
+            .navigationTitle("Gestione Cache")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Chiudi") {
-                        dismiss()
-                    }
+                    Button("Chiudi") { dismiss() }
                 }
+            }
+            .alert("Pulisci Cache", isPresented: $showingCleanAlert) {
+                Button("Annulla", role: .cancel) { }
+                Button("Pulisci", role: .destructive) {
+                    viewModel.cleanOldImages()
+                }
+            } message: {
+                Text("Questa operazione rimuoverà tutte le immagini del profilo più vecchie di 30 giorni. L'operazione non può essere annullata.")
             }
         }
     }
