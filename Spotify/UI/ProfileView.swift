@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
-    @StateObject private var viewModel = ProfileViewModel()
+    @ObservedObject var viewModel = ProfileViewModel()
     @EnvironmentObject var appViewModel: AppViewModel
     @State private var showingPhotoPicker = false
     @State private var selectedItem: PhotosPickerItem?

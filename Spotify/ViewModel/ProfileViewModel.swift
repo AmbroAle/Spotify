@@ -17,10 +17,10 @@ class ProfileViewModel: ObservableObject {
 
     init() {
         createImagesDirectoryIfNeeded()
+        loadLastLocalImage()
     }
     
     func fetchUserProfile() {
-        print("🔄 Inizio fetch profilo utente...")
         
         guard let currentUser = Auth.auth().currentUser else {
             username = "Ospite"
@@ -29,7 +29,6 @@ class ProfileViewModel: ObservableObject {
             return
         }
         
-        print("👤 Recupero dati per UID: \(currentUser.uid)")
         
         let userDocRef = db.collection("users").document(currentUser.uid)
         userDocRef.getDocument { [weak self] document, error in
@@ -57,7 +56,6 @@ class ProfileViewModel: ObservableObject {
         let email = user.email ?? ""
         let username = String(email.split(separator: "@").first ?? "Utente")
         
-        print("🆕 Creazione documento per utente: \(username)")
         
         let userData: [String: Any] = [
             "username": username,
@@ -154,10 +152,8 @@ class ProfileViewModel: ObservableObject {
             return
         }
         
-        // Aggiorna l'URL dell'immagine corrente
         userImageURL = URL(fileURLWithPath: path)
         
-        // Carica anche i dati dell'immagine per la visualizzazione immediata
         do {
             let imageData = try Data(contentsOf: URL(fileURLWithPath: path))
             pickedImageData = imageData
