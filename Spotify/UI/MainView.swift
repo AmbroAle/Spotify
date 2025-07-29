@@ -10,9 +10,9 @@ struct MainView: View {
                 case .home:
                     HomeView()
                 case .library:
-                    EmptyView()
+                    LibraryView()
                 case .create:
-                    EmptyView()
+                    CreatePlaylistView()
                 case .none:
                     HomeView()
                 }

@@ -1,10 +1,11 @@
 import SwiftUI
 
-//controllare perchè cambia leggeremente il colore quando cambi pagine con home
 struct BottomMenuView: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    @State private var showCreateSheet = false
+
     let barHeight: CGFloat = 60
-    
+
     var body: some View {
         HStack(spacing: 40) {
             Button {
@@ -20,7 +21,7 @@ struct BottomMenuView: View {
             }
 
             Button {
-                navigationManager.goTo(.create)
+                showCreateSheet = true
             } label: {
                 menuItem(icon: "plus.circle.fill", label: "Crea")
             }
@@ -28,6 +29,11 @@ struct BottomMenuView: View {
         .frame(height: barHeight)
         .frame(maxWidth: .infinity)
         .background(.ultraThinMaterial)
+        .sheet(isPresented: $showCreateSheet) {
+            CreatePlaylistView()
+                .presentationDetents([.medium]) // o [.fraction(0.4)]
+                .presentationBackground(.ultraThinMaterial)
+        }
     }
 
     private func menuItem(icon: String, label: String) -> some View {
