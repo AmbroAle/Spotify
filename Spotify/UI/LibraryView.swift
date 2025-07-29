@@ -28,7 +28,7 @@ struct LibraryView: View {
                     // Liked Tracks
                     VStack(alignment: .leading) {
                         NavigationLink {
-                            Text("Brani con like")
+                            LikedTracksView()
                         } label: {
                             HStack {
                                 Image(systemName: "heart.fill")
@@ -68,7 +68,7 @@ struct LibraryView: View {
                                 } label: {
                                     HStack {
                                         Image(systemName: "music.note.list")
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.green)
                                             .frame(width: 24, height: 24)
 
                                         Text(playlist.name)
@@ -117,8 +117,4 @@ struct LibraryView: View {
             }
         }
     }
-}
-
-#Preview {
-    LibraryView()
 }
