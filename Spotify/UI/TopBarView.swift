@@ -26,7 +26,6 @@ struct TopBarView: View {
             Spacer()
         }
         .frame(maxWidth: UIScreen.main.bounds.width)
-        .background(.ultraThinMaterial)
     }
     
     private func tabButton(title: String) -> some View {
