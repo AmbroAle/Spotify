@@ -34,6 +34,7 @@ struct BottomMenuView: View {
                 .presentationDetents([.fraction(0.4)]) // o .medium
                 .presentationBackground(.ultraThinMaterial)
         }
+        .background(.ultraThinMaterial)
     }
 
     private func menuItem(icon: String, label: String) -> some View {
