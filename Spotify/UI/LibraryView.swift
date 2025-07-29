@@ -2,13 +2,14 @@ import SwiftUI
 
 struct LibraryView: View {
     @State private var showAddArtistSheet = false
+    @StateObject private var viewModel = PlaylistLibraryViewModel()
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // Intestazione: Immagine + titolo
+                    // Intestazione
                     HStack {
                         Image("UserIconDarkMode")
                             .resizable()
@@ -24,10 +25,9 @@ struct LibraryView: View {
                     }
                     .padding(.horizontal)
 
-                    // NavigationLink ai brani piaciuti
+                    // Liked Tracks
                     VStack(alignment: .leading) {
                         NavigationLink {
-                            // LikedTracksView() — da implementare
                             Text("Brani con like")
                         } label: {
                             HStack {
@@ -49,33 +49,40 @@ struct LibraryView: View {
                     }
                     .padding(.horizontal)
 
-                    // Lista di playlist (placeholder)
+                    // Le tue playlist
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Le tue playlist")
                             .font(.headline)
                             .padding(.horizontal)
 
-                        ForEach(0..<3, id: \.self) { index in
-                            NavigationLink {
-                                // PlaylistDetailView(...) — da implementare
-                                Text("Dettagli playlist \(index + 1)")
-                            } label: {
-                                HStack {
-                                    Image(systemName: "music.note.list")
-                                        .foregroundColor(.blue)
-                                        .frame(width: 24, height: 24)
-
-                                    Text("Playlist \(index + 1)")
-                                        .font(.body)
-
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                }
+                        if viewModel.isLoading {
+                            ProgressView().padding()
+                        } else if viewModel.playlists.isEmpty {
+                            Text("Nessuna playlist trovata.")
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
-                                .padding(.vertical, 8)
-                                .background(.thinMaterial)
-                                .cornerRadius(10)
+                        } else {
+                            ForEach(viewModel.playlists) { playlist in
+                                NavigationLink {
+                                    Text("Dettagli playlist: \(playlist.name)")
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "music.note.list")
+                                            .foregroundColor(.blue)
+                                            .frame(width: 24, height: 24)
+
+                                        Text(playlist.name)
+                                            .font(.body)
+
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .background(.thinMaterial)
+                                    .cornerRadius(10)
+                                }
                             }
                         }
                     }
@@ -99,8 +106,11 @@ struct LibraryView: View {
                 }
                 .padding(.top)
             }
+            .navigationTitle("")
+            .task {
+                viewModel.fetchPlaylists()
+            }
             .sheet(isPresented: $showAddArtistSheet) {
-                // AddArtistView() — da implementare
                 Text("Aggiungi artista")
                     .font(.title)
                     .padding()

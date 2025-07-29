@@ -12,6 +12,7 @@ class CreatePlaylistViewModel: ObservableObject {
     func savePlaylist() {
         guard let uid = Auth.auth().currentUser?.uid else {
             errorMessage = "Utente non autenticato"
+            print("❌ Utente non autenticato")
             return
         }
 
@@ -20,12 +21,19 @@ class CreatePlaylistViewModel: ObservableObject {
 
         do {
             let data = try Firestore.Encoder().encode(playlist)
-            db.collection("users").document(uid).collection("playlists").document(playlist.id).setData(data) { error in
+            db.collection("users")
+                .document(uid)
+                .collection("playlists")
+                .document(playlist.id)
+                .setData(data) { error in
+
                 DispatchQueue.main.async {
                     self.isSaving = false
                     if let error = error {
                         self.errorMessage = "Errore salvataggio: \(error.localizedDescription)"
+                        print("❌ Errore salvataggio playlist: \(error.localizedDescription)")
                     } else {
+                        print("✅ Playlist salvata con successo: \(self.playlistName) (ID: \(playlist.id))")
                         self.playlistName = ""
                     }
                 }
@@ -33,6 +41,7 @@ class CreatePlaylistViewModel: ObservableObject {
         } catch {
             isSaving = false
             errorMessage = "Errore nella codifica dei dati"
+            print("❌ Errore nella codifica dei dati")
         }
     }
 }

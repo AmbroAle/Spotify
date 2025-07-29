@@ -31,7 +31,7 @@ struct BottomMenuView: View {
         .background(.ultraThinMaterial)
         .sheet(isPresented: $showCreateSheet) {
             CreatePlaylistView()
-                .presentationDetents([.medium]) // o [.fraction(0.4)]
+                .presentationDetents([.fraction(0.4)]) // o .medium
                 .presentationBackground(.ultraThinMaterial)
         }
         .background(.ultraThinMaterial)
