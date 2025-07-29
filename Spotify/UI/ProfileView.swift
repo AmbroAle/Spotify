@@ -14,7 +14,6 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            // Immagine profilo corrente
             ZStack(alignment: .bottomTrailing) {
                 profileImageView
                     .onTapGesture {
@@ -150,7 +149,6 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Cache Info View
 struct CacheInfoView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.dismiss) private var dismiss

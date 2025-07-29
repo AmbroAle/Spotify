@@ -76,18 +76,15 @@ struct SavedProfileImagesView: View {
                                 
                                 Spacer()
                                 
-                                // Pulsanti azione
                                 VStack(spacing: 8) {
-                                    // Pulsante "Usa come profilo"
                                     Button(action: {
                                         print("Impostando come immagine profilo: \(image.localPath)")
                                         viewModel.setAsCurrentProfileImage(image.localPath)
                                         
-                                        // Aggiorna anche pickedImageData per mostrare subito l'immagine
+                                        // Aggiorno subito per mostrare l'immagine appena impostata
                                         if let imageData = try? Data(contentsOf: URL(fileURLWithPath: image.localPath)) {
                                             viewModel.pickedImageData = imageData
                                         }
-                                        // Chiudi la view dopo 0.5 secondi per dare feedback visivo
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                             dismiss()
                                         }
@@ -118,7 +115,7 @@ struct SavedProfileImagesView: View {
                                             .background(Color.red)
                                             .cornerRadius(8)
                                     }
-                                    .buttonStyle(.plain) // <--- AGGIUNGI QUESTO
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.vertical, 4)

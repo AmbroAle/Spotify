@@ -23,7 +23,6 @@ class ProfileViewModel: ObservableObject {
         print("🔄 Inizio fetch profilo utente...")
         
         guard let currentUser = Auth.auth().currentUser else {
-            print("❌ Nessun utente autenticato")
             username = "Ospite"
             email = ""
             userImageURL = nil
@@ -37,7 +36,6 @@ class ProfileViewModel: ObservableObject {
             guard let self = self else { return }
             
             if let error = error {
-                print("❌ Errore fetch profilo: \(error.localizedDescription)")
                 Task { @MainActor in
                     self.username = "Errore caricamento"
                 }
@@ -45,7 +43,6 @@ class ProfileViewModel: ObservableObject {
             }
             
             if let doc = document, doc.exists {
-                print("✅ Documento utente trovato")
                 let data = doc.data()
                 
                 let fetchedUsername = data?["username"] as? String ?? "Sconosciuto"
@@ -54,12 +51,10 @@ class ProfileViewModel: ObservableObject {
                 Task { @MainActor in
                     self.username = fetchedUsername
                     self.email = fetchedEmail
-                    print("✅ Profilo aggiornato: \(fetchedUsername)")
                 }
                 
                 self.loadLastLocalImage()
             } else {
-                print("⚠️ Documento utente non trovato, creazione automatica...")
                 self.createMissingUserDocument(currentUser)
             }
         }
@@ -79,12 +74,11 @@ class ProfileViewModel: ObservableObject {
         
         db.collection("users").document(user.uid).setData(userData) { [weak self] error in
             if let error = error {
-                print("❌ Errore creazione documento utente: \(error.localizedDescription)")
+                print("Errore creazione documento utente: \(error.localizedDescription)")
                 Task { @MainActor in
                     self?.username = "Errore"
                 }
             } else {
-                print("✅ Documento utente creato: \(username)")
                 Task { @MainActor in
                     self?.username = username
                     self?.email = email
@@ -94,7 +88,6 @@ class ProfileViewModel: ObservableObject {
     }
 
     func changeProfileImage(_ imageData: Data) {
-        print("🖼️ Cambiando immagine profilo...")
         pickedImageData = imageData
         saveProfileImageLocally(imageData)
     }
@@ -104,7 +97,6 @@ class ProfileViewModel: ObservableObject {
         let fileName = "profile_\(UUID().uuidString)_\(timestamp).jpg"
         
         guard let dirURL = getImagesDirectoryURL() else {
-            print("❌ Impossibile ottenere directory immagini")
             return
         }
         
@@ -112,7 +104,6 @@ class ProfileViewModel: ObservableObject {
         
         do {
             try imageData.write(to: fileURL)
-            print("✅ Immagine salvata: \(fileURL.path)")
             
             let imageMeta = ProfileImageData(
                 id: fileName,
@@ -124,17 +115,15 @@ class ProfileViewModel: ObservableObject {
             savedProfileImages.insert(imageMeta, at: 0)
             userImageURL = fileURL
             
-            print("✅ Metadata aggiornato, totale immagini: \(savedProfileImages.count)")
         } catch {
-            print("❌ Errore salvataggio immagine: \(error)")
+            print("Errore salvataggio immagine: \(error)")
         }
     }
 
     func fetchSavedProfileImages() async {
-        print("📂 Caricamento immagini salvate...")
         
         guard let dirURL = getImagesDirectoryURL() else {
-            print("❌ Directory non trovata")
+            print("Directory non trovata")
             return
         }
         
@@ -143,7 +132,7 @@ class ProfileViewModel: ObservableObject {
             
             let images = contents.compactMap { url -> ProfileImageData? in
                 guard fileManager.fileExists(atPath: url.path) else {
-                    print("⚠️ File non esistente: \(url.path)")
+                    print("File non esistente: \(url.path)")
                     return nil
                 }
                 
@@ -159,19 +148,16 @@ class ProfileViewModel: ObservableObject {
             }.sorted(by: { $0.timestamp > $1.timestamp })
             
             savedProfileImages = images
-            print("✅ Caricate \(images.count) immagini")
             
         } catch {
-            print("❌ Errore caricamento immagini: \(error)")
             savedProfileImages = []
         }
     }
 
     func setAsCurrentProfileImage(_ path: String) {
-        print("🔄 Impostando come immagine corrente: \(path)")
         
         guard fileManager.fileExists(atPath: path) else {
-            print("❌ File immagine non trovato: \(path)")
+            print("File immagine non trovato: \(path)")
             return
         }
         
@@ -182,18 +168,14 @@ class ProfileViewModel: ObservableObject {
         do {
             let imageData = try Data(contentsOf: URL(fileURLWithPath: path))
             pickedImageData = imageData
-            print("✅ Immagine impostata come corrente")
         } catch {
-            print("⚠️ Errore caricamento dati immagine: \(error)")
-            // L'URL è comunque impostato, quindi funzionerà con AsyncImage
+            print("Errore caricamento dati immagine: \(error)")
         }
     }
 
     func removeSavedProfileImage(_ id: String) {
-        print("🗑️ Rimozione immagine: \(id)")
-        
         guard let imageToDelete = savedProfileImages.first(where: { $0.id == id }) else {
-            print("❌ Immagine non trovata per ID: \(id)")
+            print("Immagine non trovata per ID: \(id)")
             return
         }
         
@@ -205,25 +187,21 @@ class ProfileViewModel: ObservableObject {
             if userImageURL?.path == imageToDelete.localPath {
                 userImageURL = nil
                 pickedImageData = nil
-                print("⚠️ Rimossa immagine corrente")
             }
             
-            print("✅ Immagine rimossa: \(imageToDelete.localPath)")
         } catch {
-            print("❌ Errore rimozione immagine: \(error)")
+            print("Errore rimozione immagine: \(error)")
         }
     }
     
     private func loadLastLocalImage() {
-        print("🔄 Caricamento ultima immagine locale...")
         
         Task {
             await fetchSavedProfileImages()
             if let lastImage = savedProfileImages.first {
                 userImageURL = URL(fileURLWithPath: lastImage.localPath)
-                print("✅ Ultima immagine caricata: \(lastImage.localPath)")
             } else {
-                print("ℹ️ Nessuna immagine locale trovata")
+                print("Nessuna immagine locale trovata")
             }
         }
     }
@@ -235,9 +213,8 @@ class ProfileViewModel: ObservableObject {
         if !fileManager.fileExists(atPath: dirURL.path) {
             do {
                 try fileManager.createDirectory(at: dirURL, withIntermediateDirectories: true, attributes: nil)
-                print("✅ Cartella immagini creata: \(dirURL.path)")
             } catch {
-                print("❌ Errore creazione cartella: \(error)")
+                print("Errore creazione cartella: \(error)")
             }
         }
     }
@@ -248,7 +225,6 @@ class ProfileViewModel: ObservableObject {
     }
 
     func cleanOldImages(olderThan days: Int = 30) {
-        print("🧹 Pulizia immagini vecchie...")
         
         guard let dirURL = getImagesDirectoryURL() else { return }
         
@@ -263,18 +239,16 @@ class ProfileViewModel: ObservableObject {
                    creationDate < cutoffDate {
                     try fileManager.removeItem(at: fileURL)
                     deletedCount += 1
-                    print("🗑️ Rimossa immagine vecchia: \(fileURL.lastPathComponent)")
                 }
             }
             
-            print("✅ Pulizia completata: \(deletedCount) immagini rimosse")
             
             Task {
                 await fetchSavedProfileImages()
             }
             
         } catch {
-            print("❌ Errore pulizia immagini: \(error)")
+            print("Errore pulizia immagini: \(error)")
         }
     }
 
@@ -292,7 +266,7 @@ class ProfileViewModel: ObservableObject {
             return ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
             
         } catch {
-            print("❌ Errore calcolo dimensione cache: \(error)")
+            print("Errore calcolo dimensione cache: \(error)")
             return "N/A"
         }
     }
@@ -308,9 +282,8 @@ class ProfileViewModel: ObservableObject {
     func logout() {
         do {
             try Auth.auth().signOut()
-            print("✅ Logout effettuato")
         } catch {
-            print("❌ Errore logout: \(error.localizedDescription)")
+            print("Errore logout: \(error.localizedDescription)")
         }
     }
 }
