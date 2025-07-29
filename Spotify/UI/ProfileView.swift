@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
-    @StateObject private var viewModel = ProfileViewModel()
+    @ObservedObject var viewModel = ProfileViewModel()
     @EnvironmentObject var appViewModel: AppViewModel
     @State private var showingPhotoPicker = false
     @State private var selectedItem: PhotosPickerItem?
@@ -11,6 +11,7 @@ struct ProfileView: View {
     @State private var showingSavedImages = false
     @State private var showingChangePassword = false
     @State private var showingCacheInfo = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 20) {
@@ -19,7 +20,7 @@ struct ProfileView: View {
                     .onTapGesture {
                         showingSourceActionSheet = true
                     }
-
+                
                 Image(systemName: "camera.fill")
                     .foregroundColor(.white)
                     .padding(8)
@@ -31,17 +32,17 @@ struct ProfileView: View {
             .clipShape(Circle())
             .shadow(radius: 8)
             .padding(.top, 40)
-
+            
             Text(viewModel.username)
                 .font(.title)
                 .fontWeight(.bold)
-
+            
             Text(viewModel.email)
                 .font(.subheadline)
                 .foregroundColor(.gray)
-
+            
             Divider().padding(.vertical, 20)
-
+            
             // Voci per il profilo
             VStack(spacing: 15) {
                 profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
@@ -66,7 +67,7 @@ struct ProfileView: View {
             .sheet(isPresented: $showingCacheInfo) {
                 CacheInfoView(viewModel: viewModel)
             }
-
+            
             Spacer()
         }
         .padding()
@@ -107,6 +108,17 @@ struct ProfileView: View {
         }
         .navigationTitle("Profilo")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.blue)
+                }
+            }
+        }
     }
 
     @ViewBuilder

@@ -2,19 +2,18 @@ import SwiftUI
 
 struct TopBarView: View {
     @Binding var selectedTab: String
-    
+    @ObservedObject var profileViewModel: ProfileViewModel
+
     var body: some View {
         HStack(spacing: 14) {
-            NavigationLink(destination: ProfileView()) {
-                Image("UserIconDarkMode")
-                    .resizable()
+            NavigationLink(destination: ProfileView(viewModel: profileViewModel)) {
+                profileImageView
                     .scaledToFill()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())
                     .padding(.leading, 6)
             }
             .buttonStyle(PlainButtonStyle())
-
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     tabButton(title: "Tutti")
@@ -51,5 +50,31 @@ struct TopBarView: View {
         )
     }
 
+    @ViewBuilder
+        private var profileImageView: some View {
+            if let imageData = profileViewModel.pickedImageData,
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+            } else if let url = profileViewModel.userImageURL {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        Image("UserIconDarkMode").resizable().scaledToFill()
+                    @unknown default:
+                        Image("UserIconDarkMode").resizable().scaledToFill()
+                    }
+                }
+            } else {
+                Image("UserIconDarkMode")
+                    .resizable()
+                    .scaledToFill()
+            }
+        }
     
 }

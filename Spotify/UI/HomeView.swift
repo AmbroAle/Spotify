@@ -4,11 +4,12 @@ struct HomeView: View {
     @State private var selectedTab: String = ""
     @StateObject private var artistVM = ArtistViewModel()
     @StateObject private var albumVM = AlbumViewModel()
+    @StateObject private var profileVM = ProfileViewModel()
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
-                TopBarView(selectedTab: $selectedTab)
+                TopBarView(selectedTab: $selectedTab,profileViewModel: profileVM)
                     .frame(maxWidth: .infinity)
                     
                 
