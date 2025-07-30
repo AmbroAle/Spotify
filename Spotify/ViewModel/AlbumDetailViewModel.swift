@@ -151,42 +151,40 @@ class AlbumDetailViewModel: ObservableObject {
     }
     
     func fetchFullLikedTracks() {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
+           guard let userID = Auth.auth().currentUser?.uid else { return }
 
-        let db = Firestore.firestore()
-        db.collection("users")
-            .document(userID)
-            .collection("likedTracks")
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    print("Errore caricamento liked tracks: \(error)")
-                    return
-                }
+           let db = Firestore.firestore()
+           db.collection("users")
+               .document(userID)
+               .collection("likedTracks")
+               .getDocuments { snapshot, error in
+                   if let error = error {
+                       print("Errore caricamento liked tracks: \(error)")
+                       return
+                   }
 
-                guard let documents = snapshot?.documents else { return }
-                let ids = documents.compactMap { Int($0.documentID) }
+                   guard let documents = snapshot?.documents else { return }
+                   let ids = documents.compactMap { Int($0.documentID) }
 
-                Task {
-                    var fetchedTracks: [TrackAlbumDetail] = []
+                   Task {
+                       var fetchedTracks: [TrackAlbumDetail] = []
 
-                    for id in ids {
-                        let urlString = "https://api.deezer.com/track/\(id)"
-                        guard let url = URL(string: urlString) else { continue }
+                       for id in ids {
+                           let urlString = "https://api.deezer.com/track/\(id)"
+                           guard let url = URL(string: urlString) else { continue }
 
-                        do {
-                            let (data, _) = try await URLSession.shared.data(from: url)
-                            let track = try JSONDecoder().decode(TrackAlbumDetail.self, from: data)
-                            fetchedTracks.append(track)
-                        } catch {
-                            print("Errore nel fetch per traccia \(id): \(error)")
-                        }
-                    }
+                           do {
+                               let (data, _) = try await URLSession.shared.data(from: url)
+                               let track = try JSONDecoder().decode(TrackAlbumDetail.self, from: data)
+                               fetchedTracks.append(track)
+                           } catch {
+                               print("Errore nel fetch per traccia \(id): \(error)")
+                           }
+                       }
 
-                    DispatchQueue.main.async {
-                        self.tracks = fetchedTracks
-                        self.likedTracks = Set(ids)
-                    }
-                }
-            }
-    }
+                       self.tracks = fetchedTracks
+                       self.likedTracks = Set(ids)
+                   }
+               }
+       }
 }

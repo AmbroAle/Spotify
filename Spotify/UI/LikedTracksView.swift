@@ -6,7 +6,6 @@ struct LikedTracksView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-
             if viewModel.tracks.isEmpty {
                 Text("Nessun brano con like trovato.")
                     .foregroundColor(.gray)
@@ -16,12 +15,13 @@ struct LikedTracksView: View {
                     ForEach(viewModel.tracks) { track in
                         TrackRowView(
                             track: track,
-                            albumCoverURL: "", // Inserisci URL se disponibile
+                            albumCoverURL: track.cover_medium ?? "",
                             viewModel: viewModel
                         )
                         .buttonStyle(.plain)
                     }
                 }
+                .listStyle(.plain)
                 .navigationTitle("Brani che ti piacciono")
                 .navigationBarBackButtonHidden()
                 .toolbar {
@@ -35,7 +35,6 @@ struct LikedTracksView: View {
                         }
                     }
                 }
-                
             }
         }
         .onAppear {
