@@ -3,6 +3,7 @@ import SwiftUI
 struct BottomMenuView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @State private var showCreateSheet = false
+    @EnvironmentObject var notificationManager: NotificationManager
 
     let barHeight: CGFloat = 60
 
@@ -31,6 +32,7 @@ struct BottomMenuView: View {
         .background(.ultraThinMaterial)
         .sheet(isPresented: $showCreateSheet) {
             CreatePlaylistView()
+                .environmentObject(notificationManager)
                 .presentationDetents([.fraction(0.4)]) // o .medium
                 .presentationBackground(.ultraThinMaterial)
         }
