@@ -6,6 +6,7 @@ import AVFoundation
 @MainActor
 class AddTrackSheetViewModel: ObservableObject {
     @Published var topTracks: [TrackAlbumDetail] = []
+    @Published var likedTracks: [TrackAlbumDetail] = []
     @Published var currentlyPlayingTrackID: Int?
     @Published var addedTrackIDs: Set<Int> = []
 
@@ -104,5 +105,6 @@ class AddTrackSheetViewModel: ObservableObject {
             print("Errore nel fetch dei trackIDs: \(error)")
         }
     }
+    
 }
 

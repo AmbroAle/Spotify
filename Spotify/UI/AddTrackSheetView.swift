@@ -22,9 +22,9 @@ struct AddTrackSheetView: View {
                 TabView(selection: $selectedIndex) {
                     RecommendedTracksView(selectedPlaylistID: playlistID)
                         .tag(0)
-                    LikedTracksViewFiltered(searchText: $searchText)
+                    LikedTracksViewFiltered(selectedPlaylistID: playlistID)
                         .tag(1)
-                    RecentTracksViewFiltered(searchText: $searchText)
+                    RecentTracksViewFiltered(selectedPlaylistID: playlistID)
                         .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
