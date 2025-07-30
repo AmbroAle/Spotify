@@ -3,10 +3,16 @@ import SwiftUI
 struct TopBarView: View {
     @Binding var selectedTab: String
     @ObservedObject var profileViewModel: ProfileViewModel
+    @EnvironmentObject var notificationManager: NotificationManager
+    var showNotification: (String) -> Void
 
     var body: some View {
         HStack(spacing: 14) {
-            NavigationLink(destination: ProfileView(viewModel: profileViewModel)) {
+            NavigationLink(destination:
+                ProfileView(viewModel: profileViewModel)
+                    .environmentObject(notificationManager)
+                    .overlay(NotificationBannerView())
+            ){
                 profileImageView
                     .scaledToFill()
                     .frame(width: 40, height: 40)
@@ -14,6 +20,7 @@ struct TopBarView: View {
                     .padding(.leading, 6)
             }
             .buttonStyle(PlainButtonStyle())
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     tabButton(title: "Tutti")
