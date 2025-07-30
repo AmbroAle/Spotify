@@ -11,6 +11,7 @@ struct ProfileView: View {
     @State private var showingSavedImages = false
     @State private var showingChangePassword = false
     @State private var showingCacheInfo = false
+    @State private var showingNotifySettings = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -51,10 +52,10 @@ struct ProfileView: View {
                 profileRow(icon: "externaldrive.fill", text: "Info Cache (\(viewModel.getCacheSize()))") {
                     showingCacheInfo = true
                 }
-                profileRow(icon: "gearshape.fill", text: "Impostazioni") {
-                    // Da implementare
+                profileRow(icon: "bell.fill", text: "Notifiche") {
+                    showingNotifySettings = true
                 }
-                profileRow(icon: "lock.fill", text: "Privacy") {
+                profileRow(icon: "lock.fill", text: "Paasword") {
                     showingChangePassword = true
                 }
                 profileRow(icon: "rectangle.portrait.and.arrow.right", text: "Logout") {
@@ -66,6 +67,9 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingCacheInfo) {
                 CacheInfoView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingNotifySettings) {
+                NotifyView()
             }
             
             Spacer()
