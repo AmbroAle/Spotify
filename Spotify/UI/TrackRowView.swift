@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct TrackRowView: View {
@@ -8,7 +7,7 @@ struct TrackRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            AsyncImage(url: URL(string: albumCoverURL)) { image in
+            AsyncImage(url: URL(string: track.cover_medium ?? albumCoverURL)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -25,10 +24,11 @@ struct TrackRowView: View {
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
                         Button(action: {
+                            let isNewTrack = viewModel.currentlyPlayingTrackID != track.id
+                            if isNewTrack {
+                                viewModel.saveRecentTrack(track)
+                            }
                             viewModel.playOrPause(track: track)
-                            if viewModel.currentlyPlayingTrackID != track.id {
-                                    viewModel.saveRecentTrack(track)
-                                }
                         }) {
                             Image(systemName: viewModel.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()
