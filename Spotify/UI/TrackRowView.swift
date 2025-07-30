@@ -20,6 +20,8 @@ struct TrackRowView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(track.title)
                     .font(.headline)
+                Text(track.artistName)
+                    .font(.caption)
 
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {

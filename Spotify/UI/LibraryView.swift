@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct LibraryView: View {
-    @State private var showAddArtistSheet = false
     @StateObject private var viewModel = PlaylistLibraryViewModel()
 
     var body: some View {
@@ -37,6 +36,7 @@ struct LibraryView: View {
 
                                 Text("Brani che ti piacciono")
                                     .font(.headline)
+                                    .foregroundColor(.primary) // <-- niente colore blu
 
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -46,14 +46,15 @@ struct LibraryView: View {
                             .background(.ultraThinMaterial)
                             .cornerRadius(12)
                         }
+                        .buttonStyle(.plain) // <-- evita stile blu del link
                     }
                     .padding(.horizontal)
 
-                    // Le tue playlist
-                    VStack(alignment: .leading, spacing: 12) {
+                    // Le tue playlist (centrate)
+                    VStack(spacing: 12) {
                         Text("Le tue playlist")
                             .font(.headline)
-                            .padding(.horizontal)
+                            .frame(maxWidth: .infinity, alignment: .center)
 
                         if viewModel.isLoading {
                             ProgressView().padding()
@@ -64,7 +65,7 @@ struct LibraryView: View {
                         } else {
                             ForEach(viewModel.playlists) { playlist in
                                 NavigationLink {
-                                    Text("Dettagli playlist: \(playlist.name)")
+                                    PlaylistDetailView(playlist: playlist)
                                 } label: {
                                     HStack {
                                         Image(systemName: "music.note.list")
@@ -73,6 +74,7 @@ struct LibraryView: View {
 
                                         Text(playlist.name)
                                             .font(.body)
+                                            .foregroundColor(.primary) // <-- no link blu
 
                                         Spacer()
                                         Image(systemName: "chevron.right")
@@ -83,37 +85,17 @@ struct LibraryView: View {
                                     .background(.thinMaterial)
                                     .cornerRadius(10)
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
-
-                    // Bottone per aggiungere artista
-                    Button {
-                        showAddArtistSheet = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
-                            Text("Aggiungi artista")
-                                .bold()
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                    }
+                    .padding(.horizontal)
                 }
                 .padding(.top)
             }
             .navigationTitle("")
             .task {
                 viewModel.fetchPlaylists()
-            }
-            .sheet(isPresented: $showAddArtistSheet) {
-                Text("Aggiungi artista")
-                    .font(.title)
-                    .padding()
             }
         }
     }
