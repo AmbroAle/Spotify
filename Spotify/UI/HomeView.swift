@@ -5,23 +5,62 @@ struct HomeView: View {
     @StateObject private var artistVM = ArtistViewModel()
     @StateObject private var albumVM = AlbumViewModel()
     @StateObject private var profileVM = ProfileViewModel()
-    
+    @StateObject var notificationManager = NotificationManager()
+
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 10) {
-                TopBarView(selectedTab: $selectedTab,profileViewModel: profileVM)
-                    .frame(maxWidth: .infinity)
+            ZStack {
+                NotificationBannerView().environmentObject(notificationManager)
+
+                VStack(spacing: 10) {
+                    TopBarView(selectedTab: $selectedTab, profileViewModel: profileVM, showNotification: showInAppNotification)
+                        .frame(maxWidth: .infinity)
                     
+                    contentView(for: selectedTab)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .background(.ultraThinMaterial)
                 
-                contentView(for: selectedTab)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+                if let message = notificationManager.inAppMessage {
+                    VStack {
+                        HStack {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.white)
+                            Text(message)
+                                .foregroundColor(.white)
+                                .fontWeight(.medium)
+                            Spacer()
+                            Button {
+                                notificationManager.inAppMessage = nil
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                    .transition(.move(edge: .top))
+                    .animation(.easeInOut, value: notificationManager.inAppMessage)
+                }
             }
-            .background(.ultraThinMaterial)
+            .environmentObject(notificationManager)
         }
         .navigationBarBackButtonHidden(true)
     }
     
+    func showInAppNotification(_ message: String) {
+        guard UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled") else { return }
+        
+        notificationManager.show(message: message)
+    }
+
     @ViewBuilder
     private func contentView(for tab: String) -> some View {
         switch tab {
@@ -54,6 +93,7 @@ struct HomeView: View {
         }
     }
 }
+
 
 #Preview {
     HomeView()

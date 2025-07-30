@@ -9,7 +9,8 @@ struct ChangePasswordView: View {
     @State private var errorMessage: String?
     @State private var successMessage: String?
     @State private var isProcessing = false
-    
+    @EnvironmentObject var notificationManager: NotificationManager
+
     var body: some View {
         NavigationView {
             Form {
@@ -78,7 +79,6 @@ struct ChangePasswordView: View {
         successMessage = nil
         isProcessing = true
         
-        // Re-authenticate user with current password
         guard let user = Auth.auth().currentUser,
               let email = user.email else {
             errorMessage = "Utente non autenticato."
@@ -93,7 +93,6 @@ struct ChangePasswordView: View {
                 successMessage = nil
                 isProcessing = false
             } else {
-                // Cambia la password
                 user.updatePassword(to: newPassword) { error in
                     if let error = error {
                         errorMessage = "Errore durante il cambio password: \(error.localizedDescription)"
@@ -101,7 +100,7 @@ struct ChangePasswordView: View {
                     } else {
                         successMessage = "Password cambiata con successo!"
                         errorMessage = nil
-                        // Optional: chiudi la view dopo qualche secondo
+                        notificationManager.show(message: "Password cambiata con successo!")
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                             dismiss()
                         }

@@ -13,6 +13,7 @@ struct ProfileView: View {
     @State private var showingCacheInfo = false
     @State private var showingNotifySettings = false
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var notificationManager: NotificationManager
 
     var body: some View {
         VStack(spacing: 20) {
@@ -55,7 +56,7 @@ struct ProfileView: View {
                 profileRow(icon: "bell.fill", text: "Notifiche") {
                     showingNotifySettings = true
                 }
-                profileRow(icon: "lock.fill", text: "Paasword") {
+                profileRow(icon: "lock.fill", text: "Password") {
                     showingChangePassword = true
                 }
                 profileRow(icon: "rectangle.portrait.and.arrow.right", text: "Logout") {
@@ -63,7 +64,8 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showingChangePassword) {
-                ChangePasswordView()
+                ChangePasswordView().environmentObject(notificationManager)
+
             }
             .sheet(isPresented: $showingCacheInfo) {
                 CacheInfoView(viewModel: viewModel)
@@ -75,6 +77,11 @@ struct ProfileView: View {
             Spacer()
         }
         .padding()
+        .overlay(
+            NotificationBannerView()
+                .environmentObject(notificationManager)
+                , alignment: .top
+        )
         .onAppear {
             viewModel.fetchUserProfile()
             Task {

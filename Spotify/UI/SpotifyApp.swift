@@ -21,10 +21,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct SpotifyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var appViewModel = AppViewModel()
+    @StateObject private var notificationManager = NotificationManager.shared
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environmentObject(notificationManager)
                 .environmentObject(appViewModel)
                 .preferredColorScheme(.dark)
         }
