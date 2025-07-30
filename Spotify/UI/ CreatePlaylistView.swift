@@ -41,7 +41,7 @@ struct CreatePlaylistView: View {
                                 }
                             }
                         } else if !viewModel.isSaving && viewModel.playlistName.isEmpty {
-                            notificationManager.show(message: "🎵 Playlist '\(savedPlaylistName)' creata con successo!")
+                            notificationManager.show(message: "Playlist '\(savedPlaylistName)' creata con successo!")
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                 dismiss()
