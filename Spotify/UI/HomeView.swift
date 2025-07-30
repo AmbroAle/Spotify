@@ -56,10 +56,11 @@ struct HomeView: View {
     }
     
     func showInAppNotification(_ message: String) {
-        guard UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled") else { return }
-        
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
         notificationManager.show(message: message)
     }
+
 
     @ViewBuilder
     private func contentView(for tab: String) -> some View {
