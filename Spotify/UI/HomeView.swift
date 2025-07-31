@@ -4,7 +4,7 @@ struct HomeView: View {
     @State private var selectedTab: String = ""
     @StateObject private var artistVM = ArtistViewModel()
     @StateObject private var albumVM = AlbumViewModel()
-    @StateObject private var profileVM = ProfileViewModel()
+    @EnvironmentObject var profileVM: ProfileViewModel
     @StateObject var notificationManager = NotificationManager()
 
 

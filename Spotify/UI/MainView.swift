@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainView: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var profileVM: ProfileViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -10,7 +11,7 @@ struct MainView: View {
                 case .home:
                     HomeView()
                 case .library:
-                    LibraryView()
+                    LibraryView(profileViewModel: profileVM)
                 case .create:
                     CreatePlaylistView()
                 case .none:
@@ -21,10 +22,4 @@ struct MainView: View {
             BottomMenuView()
         }
     }
-}
-
-#Preview {
-    MainView()
-        .environmentObject(AppViewModel())
-        .environmentObject(NavigationManager()) 
 }

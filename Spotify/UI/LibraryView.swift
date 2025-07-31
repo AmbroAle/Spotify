@@ -2,17 +2,14 @@ import SwiftUI
 
 struct LibraryView: View {
     @StateObject private var viewModel = PlaylistLibraryViewModel()
-
+    @ObservedObject var profileViewModel: ProfileViewModel
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // Intestazione
                     HStack {
-                        Image("UserIconDarkMode")
-                            .resizable()
-                            .scaledToFill()
+                        profileImageView
                             .frame(width: 40, height: 40)
                             .clipShape(Circle())
 
@@ -24,7 +21,6 @@ struct LibraryView: View {
                     }
                     .padding(.horizontal)
 
-                    // Liked Tracks
                     VStack(alignment: .leading) {
                         NavigationLink {
                             LikedTracksView()
@@ -36,7 +32,7 @@ struct LibraryView: View {
 
                                 Text("Brani che ti piacciono")
                                     .font(.headline)
-                                    .foregroundColor(.primary) // <-- niente colore blu
+                                    .foregroundColor(.primary)
 
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -46,11 +42,10 @@ struct LibraryView: View {
                             .background(.ultraThinMaterial)
                             .cornerRadius(12)
                         }
-                        .buttonStyle(.plain) // <-- evita stile blu del link
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal)
 
-                    // Le tue playlist (centrate)
                     VStack(spacing: 12) {
                         Text("Le tue playlist")
                             .font(.headline)
@@ -74,7 +69,7 @@ struct LibraryView: View {
 
                                         Text(playlist.name)
                                             .font(.body)
-                                            .foregroundColor(.primary) // <-- no link blu
+                                            .foregroundColor(.primary)
 
                                         Spacer()
                                         Image(systemName: "chevron.right")
@@ -97,6 +92,32 @@ struct LibraryView: View {
             .task {
                 viewModel.fetchPlaylists()
             }
+        }
+    }
+    @ViewBuilder
+    private var profileImageView: some View {
+        if let imageData = profileViewModel.pickedImageData,
+           let uiImage = UIImage(data: imageData) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+        } else if let url = profileViewModel.userImageURL {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                case .failure:
+                    Image("UserIconDarkMode").resizable().scaledToFill()
+                @unknown default:
+                    Image("UserIconDarkMode").resizable().scaledToFill()
+                }
+            }
+        } else {
+            Image("UserIconDarkMode")
+                .resizable()
+                .scaledToFill()
         }
     }
 }
