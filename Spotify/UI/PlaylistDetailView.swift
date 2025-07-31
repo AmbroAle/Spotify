@@ -3,13 +3,14 @@ import SwiftUI
 struct PlaylistDetailView: View {
     @State var playlist: Playlist
     @StateObject private var viewModel = PlaylistDetailViewModel()
+    @StateObject private var albumDetailVM = AlbumDetailViewModel()
+    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
+
     @State private var showAddTrackSheet = false
     @State private var searchText = ""
     @State private var selectedCarouselIndex = 0
     @State private var showEditAlert = false
     @State private var newPlaylistName = ""
-    @StateObject private var playerVM = PlaylistPlayerViewModel()
-
     @State private var trackToDelete: TrackAlbumDetail?
     @State private var showDeleteConfirmation = false
 
@@ -17,6 +18,7 @@ struct PlaylistDetailView: View {
 
     var body: some View {
         VStack {
+            // Header
             HStack(spacing: 16) {
                 if let url = viewModel.playlistCoverURL {
                     AsyncImage(url: url) { image in
@@ -38,15 +40,22 @@ struct PlaylistDetailView: View {
                     Text(playlist.name)
                         .font(.title)
                         .bold()
-                        .lineLimit(2)
 
                     Button(action: {
-                        playerVM.setPlaylist(viewModel.tracks)
-                        playerVM.playPlaylist()
+                        albumDetailVM.stopPlayback()
+                        if playlistPlayerVM.currentlyPlayingTrackID == nil {
+                            playlistPlayerVM.setPlaylist(viewModel.tracks)
+                            playlistPlayerVM.playPlaylist()
+                        } else {
+                            playlistPlayerVM.togglePlayPause()
+                        }
                     }) {
-                        Label("Play Playlist", systemImage: "music.note.list")
-                            .font(.title3)
-                            .foregroundColor(.green)
+                        Label(
+                            playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "Play Playlist" : "Pause Playlist",
+                            systemImage: playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "play.circle" : "pause.circle"
+                        )
+                        .font(.title3)
+                        .foregroundColor(.green)
                     }
                 }
 
@@ -60,13 +69,12 @@ struct PlaylistDetailView: View {
                         .font(.title2)
                         .padding(8)
                         .background(.ultraThinMaterial)
+                        .foregroundColor(.white)
                         .clipShape(Circle())
                 }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal)
-            .padding(.top)
-            
+            .padding([.horizontal, .top])
+
             HStack {
                 Button {
                     showAddTrackSheet = true
@@ -75,9 +83,9 @@ struct PlaylistDetailView: View {
                         .font(.subheadline)
                         .padding(8)
                         .background(Color.green.opacity(0.3))
+                        .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal)
 
@@ -87,31 +95,34 @@ struct PlaylistDetailView: View {
                 ProgressView().padding()
                 Spacer()
             } else if viewModel.tracks.isEmpty {
-                Text("Playlist vuota")
-                    .foregroundColor(.gray)
+                Text("Playlist vuota").foregroundColor(.gray)
                 Spacer()
             } else {
                 List {
                     ForEach(viewModel.tracks) { track in
-                        TrackRowView(track: track, albumCoverURL: track.cover_medium ?? "", viewModel: viewModel.albumDetailVM)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    trackToDelete = track
-                                    showDeleteConfirmation = true
-                                } label: {
-                                    Label("Elimina", systemImage: "trash")
-                                }
+                        TrackPlaylistRowView(
+                            track: track,
+                            albumDetailVM: albumDetailVM,
+                            playlistPlayerVM: playlistPlayerVM
+                        )
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                trackToDelete = track
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Elimina", systemImage: "trash")
                             }
+                        }
                     }
                 }
-                .listStyle(.plain)
             }
         }
         .navigationTitle("Playlist")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadTracks(for: playlist)
-            viewModel.albumDetailVM.fetchLikedTracks()
+            albumDetailVM.fetchLikedTracks()
         }
         .sheet(isPresented: $showAddTrackSheet) {
             AddTrackSheetView(

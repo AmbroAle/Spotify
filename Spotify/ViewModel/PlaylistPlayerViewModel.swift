@@ -4,10 +4,11 @@ import AVFoundation
 @MainActor
 class PlaylistPlayerViewModel: ObservableObject {
     @Published var currentlyPlayingTrackID: Int?
+    @Published var isPaused: Bool = false
 
     private var audioPlayer: AVPlayer?
     private var tracks: [TrackAlbumDetail] = []
-    private var currentIndex: Int = 0
+    private(set) var currentIndex: Int = 0
 
     func setPlaylist(_ tracks: [TrackAlbumDetail]) {
         self.tracks = tracks
@@ -19,7 +20,7 @@ class PlaylistPlayerViewModel: ObservableObject {
         playTrack(at: currentIndex)
     }
 
-    private func playTrack(at index: Int) {
+    func playTrack(at index: Int) {
         guard index < tracks.count else {
             stopPlayback()
             return
@@ -27,13 +28,14 @@ class PlaylistPlayerViewModel: ObservableObject {
 
         let track = tracks[index]
         guard let url = URL(string: track.preview) else {
-            playNextTrack() // se url non valida passa avanti
+            playNextTrack()
             return
         }
 
         let playerItem = AVPlayerItem(url: url)
         audioPlayer = AVPlayer(playerItem: playerItem)
         audioPlayer?.play()
+        isPaused = false
         currentlyPlayingTrackID = track.id
 
         NotificationCenter.default.removeObserver(self)
@@ -48,6 +50,18 @@ class PlaylistPlayerViewModel: ObservableObject {
         }
     }
 
+    func togglePlayPause() {
+        guard let player = audioPlayer else { return }
+
+        if isPaused {
+            player.play()
+        } else {
+            player.pause()
+        }
+
+        isPaused.toggle()
+    }
+
     func playNextTrack() {
         currentIndex += 1
         if currentIndex < tracks.count {
@@ -60,8 +74,9 @@ class PlaylistPlayerViewModel: ObservableObject {
     func stopPlayback() {
         audioPlayer?.pause()
         audioPlayer = nil
+        isPaused = false
         currentlyPlayingTrackID = nil
-        NotificationCenter.default.removeObserver(self)
         currentIndex = 0
+        NotificationCenter.default.removeObserver(self)
     }
 }

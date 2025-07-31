@@ -15,7 +15,7 @@ struct TrackAlbum: Codable {
     let title: String
 }
 
-struct TrackAlbumDetail: Codable, Identifiable {
+struct TrackAlbumDetail: Codable, Identifiable, Equatable {
     let id: Int
     let title: String
     let preview: String
