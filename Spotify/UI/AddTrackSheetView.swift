@@ -10,7 +10,6 @@ struct AddTrackSheetView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Barra di ricerca
                 TextField("Cerca brani...", text: $searchText)
                     .padding(12)
                     .background(Color(.secondarySystemBackground))
@@ -18,17 +17,20 @@ struct AddTrackSheetView: View {
                     .padding(.horizontal)
                     .padding(.top)
 
-                // Swipe tra le categorie
-                TabView(selection: $selectedIndex) {
-                    RecommendedTracksView(selectedPlaylistID: playlistID)
-                        .tag(0)
-                    LikedTracksViewFiltered(selectedPlaylistID: playlistID)
-                        .tag(1)
-                    RecentTracksViewFiltered(selectedPlaylistID: playlistID)
-                        .tag(2)
+                if !searchText.isEmpty {
+                    SearchTracksView(searchText: $searchText, selectedPlaylistID: playlistID)
+                } else {
+                    TabView(selection: $selectedIndex) {
+                        RecommendedTracksView(selectedPlaylistID: playlistID)
+                            .tag(0)
+                        LikedTracksViewFiltered(selectedPlaylistID: playlistID)
+                            .tag(1)
+                        RecentTracksViewFiltered(selectedPlaylistID: playlistID)
+                            .tag(2)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                    .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             }
             .navigationTitle("Aggiungi brano")
             .navigationBarTitleDisplayMode(.inline)
