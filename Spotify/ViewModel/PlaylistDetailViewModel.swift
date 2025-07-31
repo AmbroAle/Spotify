@@ -56,4 +56,21 @@ class PlaylistDetailViewModel: ObservableObject {
             print("❌ Errore nel recupero playlist da Firestore: \(error.localizedDescription)")
         }
     }
+    
+    func updatePlaylistName(playlistID: String, newName: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        do {
+            try await Firestore.firestore()
+                .collection("users")
+                .document(uid)
+                .collection("playlists")
+                .document(playlistID)
+                .updateData(["name": newName])
+            
+            print("✅ Nome playlist aggiornato a '\(newName)'")
+        } catch {
+            print("❌ Errore aggiornamento nome playlist: \(error)")
+        }
+    }
 }

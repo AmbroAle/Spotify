@@ -1,12 +1,14 @@
 import SwiftUI
 
 struct PlaylistDetailView: View {
-    let playlist: Playlist
+    @State var playlist: Playlist
     @StateObject private var viewModel = PlaylistDetailViewModel()
     @State private var showAddTrackSheet = false
     @State private var searchText = ""
     @State private var selectedCarouselIndex = 0
-    
+    @State private var showEditAlert = false
+    @State private var newPlaylistName = ""
+
     private let carouselTabs = ["Consigliati", "Piaciuti", "Recenti"]
 
     var body: some View {
@@ -38,9 +40,10 @@ struct PlaylistDetailView: View {
                 Spacer()
 
                 Button {
-                    showAddTrackSheet = true
+                    newPlaylistName = playlist.name
+                    showEditAlert = true
                 } label: {
-                    Image(systemName: "plus")
+                    Image(systemName: "pencil")
                         .font(.title)
                         .padding(8)
                         .background(.ultraThinMaterial)
@@ -51,6 +54,22 @@ struct PlaylistDetailView: View {
             .padding()
 
             Divider()
+
+            HStack {
+                Spacer()
+                Button {
+                    showAddTrackSheet = true
+                } label: {
+                    Label("Aggiungi brano", systemImage: "plus")
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.15))
+                        .foregroundColor(.green)
+                        .clipShape(Capsule())
+                }
+                Spacer()
+            }
+            .padding(.bottom, 4)
 
             if viewModel.isLoading {
                 ProgressView()
@@ -80,7 +99,8 @@ struct PlaylistDetailView: View {
             AddTrackSheetView(
                 searchText: $searchText,
                 selectedIndex: $selectedCarouselIndex,
-                carouselTabs: carouselTabs, playlistID: playlist.id
+                carouselTabs: carouselTabs,
+                playlistID: playlist.id
             )
         }
         .onChange(of: showAddTrackSheet) {
@@ -90,5 +110,17 @@ struct PlaylistDetailView: View {
                 }
             }
         }
+        .alert("Modifica Nome Playlist", isPresented: $showEditAlert, actions: {
+            TextField("Nuovo nome", text: $newPlaylistName)
+
+            Button("Salva") {
+                playlist.name = newPlaylistName
+                Task {
+                    await viewModel.updatePlaylistName(playlistID: playlist.id, newName: newPlaylistName)
+                }
+            }
+
+            Button("Annulla", role: .cancel) {}
+        })
     }
 }

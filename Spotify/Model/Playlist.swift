@@ -2,7 +2,7 @@ import Foundation
 
 struct Playlist: Identifiable, Codable {
     let id: String
-    let name: String
+    var name: String
     var trackIDs: [Int]
     var imageURL: String?
     let createdAt: Date
