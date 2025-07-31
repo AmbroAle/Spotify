@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 @MainActor
 class PlaylistDetailViewModel: ObservableObject {
@@ -9,28 +10,43 @@ class PlaylistDetailViewModel: ObservableObject {
     var albumDetailVM = AlbumDetailViewModel() // riuso ViewModel per gestione play/like
 
     func loadTracks(for playlist: Playlist) async {
-        guard !playlist.trackIDs.isEmpty else {
-            tracks = []
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
         isLoading = true
-        var fetchedTracks: [TrackAlbumDetail] = []
+        defer { isLoading = false }
 
-        for trackID in playlist.trackIDs {
-            let urlString = "https://api.deezer.com/track/\(trackID)"
-            guard let url = URL(string: urlString) else { continue }
+        do {
+            let doc = try await Firestore.firestore()
+                .collection("users")
+                .document(uid)
+                .collection("playlists")
+                .document(playlist.id)
+                .getDocument()
 
-            do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                let track = try JSONDecoder().decode(TrackAlbumDetail.self, from: data)
-                fetchedTracks.append(track)
-            } catch {
-                print("Errore fetch traccia \(trackID): \(error)")
+            guard let data = doc.data(),
+                  let trackIDs = data["trackIDs"] as? [Int],
+                  !trackIDs.isEmpty else {
+                self.tracks = []
+                return
             }
-        }
 
-        tracks = fetchedTracks
-        isLoading = false
+            var fetchedTracks: [TrackAlbumDetail] = []
+
+            for trackID in trackIDs {
+                guard let url = URL(string: "https://api.deezer.com/track/\(trackID)") else { continue }
+
+                do {
+                    let (data, _) = try await URLSession.shared.data(from: url)
+                    let track = try JSONDecoder().decode(TrackAlbumDetail.self, from: data)
+                    fetchedTracks.append(track)
+                } catch {
+                    print("Errore fetch traccia \(trackID): \(error)")
+                }
+            }
+
+            self.tracks = fetchedTracks
+        } catch {
+            print("❌ Errore nel recupero playlist da Firestore: \(error.localizedDescription)")
+        }
     }
 }

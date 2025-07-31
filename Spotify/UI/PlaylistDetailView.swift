@@ -74,5 +74,12 @@ struct PlaylistDetailView: View {
                 carouselTabs: carouselTabs, playlistID: playlist.id
             )
         }
+        .onChange(of: showAddTrackSheet) {
+            if !showAddTrackSheet {
+                Task {
+                    await viewModel.loadTracks(for: playlist)
+                }
+            }
+        }
     }
 }
