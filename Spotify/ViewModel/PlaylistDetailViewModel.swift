@@ -7,7 +7,14 @@ class PlaylistDetailViewModel: ObservableObject {
     @Published var tracks: [TrackAlbumDetail] = []
     @Published var isLoading = false
 
-    var albumDetailVM = AlbumDetailViewModel() // riuso ViewModel per gestione play/like
+    var albumDetailVM = AlbumDetailViewModel()
+    var playlistCoverURL: URL? {
+        if let cover = tracks.first?.cover_medium, let url = URL(string: cover) {
+            return url
+        } else {
+            return nil
+        }
+    }
 
     func loadTracks(for playlist: Playlist) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }

@@ -12,15 +12,23 @@ struct PlaylistDetailView: View {
     var body: some View {
         VStack {
             HStack(spacing: 16) {
-                AsyncImage(url: URL(string: playlist.imageURL ?? "")) { image in
-                    image
+                if let url = viewModel.playlistCoverURL {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    } placeholder: {
+                        Color.gray.opacity(0.3)
+                    }
+                    .frame(width: 100, height: 100)
+                    .cornerRadius(12)
+                } else {
+                    Image("playlistcover")
                         .resizable()
                         .scaledToFill()
-                } placeholder: {
-                    Color.gray.opacity(0.3)
+                        .frame(width: 100, height: 100)
+                        .cornerRadius(12)
                 }
-                .frame(width: 100, height: 100)
-                .cornerRadius(12)
 
                 Text(playlist.name)
                     .font(.largeTitle)
