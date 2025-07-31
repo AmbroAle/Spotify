@@ -9,6 +9,9 @@ struct PlaylistDetailView: View {
     @State private var showEditAlert = false
     @State private var newPlaylistName = ""
 
+    @State private var trackToDelete: TrackAlbumDetail?
+    @State private var showDeleteConfirmation = false
+
     private let carouselTabs = ["Consigliati", "Piaciuti", "Recenti"]
 
     var body: some View {
@@ -16,9 +19,7 @@ struct PlaylistDetailView: View {
             HStack(spacing: 16) {
                 if let url = viewModel.playlistCoverURL {
                     AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
+                        image.resizable().scaledToFill()
                     } placeholder: {
                         Color.gray.opacity(0.3)
                     }
@@ -33,7 +34,7 @@ struct PlaylistDetailView: View {
                 }
 
                 Text(playlist.name)
-                    .font(.largeTitle)
+                    .font(.title)
                     .bold()
                     .lineLimit(2)
 
@@ -44,36 +45,34 @@ struct PlaylistDetailView: View {
                     showEditAlert = true
                 } label: {
                     Image(systemName: "pencil")
-                        .font(.title)
+                        .font(.title2)
                         .padding(8)
                         .background(.ultraThinMaterial)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
             }
-            .padding()
-
-            Divider()
-
+            .padding(.horizontal)
+            .padding(.top)
+            
             HStack {
-                Spacer()
                 Button {
                     showAddTrackSheet = true
                 } label: {
                     Label("Aggiungi brano", systemImage: "plus")
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(Color.green.opacity(0.15))
-                        .foregroundColor(.green)
-                        .clipShape(Capsule())
+                        .font(.subheadline)
+                        .padding(8)
+                        .background(Color.green.opacity(0.3))
+                        .cornerRadius(10)
                 }
-                Spacer()
+                .buttonStyle(.plain)
             }
-            .padding(.bottom, 4)
+            .padding(.horizontal)
+
+            Divider()
 
             if viewModel.isLoading {
-                ProgressView()
-                    .padding()
+                ProgressView().padding()
                 Spacer()
             } else if viewModel.tracks.isEmpty {
                 Text("Playlist vuota")
@@ -83,7 +82,14 @@ struct PlaylistDetailView: View {
                 List {
                     ForEach(viewModel.tracks) { track in
                         TrackRowView(track: track, albumCoverURL: track.cover_medium ?? "", viewModel: viewModel.albumDetailVM)
-                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    trackToDelete = track
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Elimina", systemImage: "trash")
+                                }
+                            }
                     }
                 }
                 .listStyle(.plain)
@@ -110,17 +116,31 @@ struct PlaylistDetailView: View {
                 }
             }
         }
-        .alert("Modifica Nome Playlist", isPresented: $showEditAlert, actions: {
+        .alert("Modifica Nome Playlist", isPresented: $showEditAlert) {
             TextField("Nuovo nome", text: $newPlaylistName)
-
             Button("Salva") {
                 playlist.name = newPlaylistName
                 Task {
                     await viewModel.updatePlaylistName(playlistID: playlist.id, newName: newPlaylistName)
                 }
             }
-
             Button("Annulla", role: .cancel) {}
-        })
+        }
+        .alert("Eliminare questa traccia?", isPresented: $showDeleteConfirmation) {
+            Button("Elimina", role: .destructive) {
+                if let track = trackToDelete {
+                    Task {
+                        await viewModel.removeTrack(track.id, from: playlist.id)
+                    }
+                }
+            }
+            Button("Annulla", role: .cancel) {
+                trackToDelete = nil
+            }
+        } message: {
+            if let track = trackToDelete {
+                Text("“\(track.title)” sarà rimossa dalla playlist.")
+            }
+        }
     }
 }

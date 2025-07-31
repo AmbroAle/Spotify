@@ -73,4 +73,23 @@ class PlaylistDetailViewModel: ObservableObject {
             print("❌ Errore aggiornamento nome playlist: \(error)")
         }
     }
+    
+    func removeTrack(_ trackID: Int, from playlistID: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let ref = Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("playlists")
+            .document(playlistID)
+
+        do {
+            try await ref.updateData([
+                "trackIDs": FieldValue.arrayRemove([trackID])
+            ])
+            self.tracks.removeAll { $0.id == trackID }
+        } catch {
+            print("❌ Errore rimozione traccia \(trackID): \(error.localizedDescription)")
+        }
+    }
 }
