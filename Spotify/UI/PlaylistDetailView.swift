@@ -8,6 +8,7 @@ struct PlaylistDetailView: View {
     @State private var selectedCarouselIndex = 0
     @State private var showEditAlert = false
     @State private var newPlaylistName = ""
+    @StateObject private var playerVM = PlaylistPlayerViewModel()
 
     @State private var trackToDelete: TrackAlbumDetail?
     @State private var showDeleteConfirmation = false
@@ -33,10 +34,21 @@ struct PlaylistDetailView: View {
                         .cornerRadius(12)
                 }
 
-                Text(playlist.name)
-                    .font(.title)
-                    .bold()
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(playlist.name)
+                        .font(.title)
+                        .bold()
+                        .lineLimit(2)
+
+                    Button(action: {
+                        playerVM.setPlaylist(viewModel.tracks)
+                        playerVM.playPlaylist()
+                    }) {
+                        Label("Play Playlist", systemImage: "music.note.list")
+                            .font(.title3)
+                            .foregroundColor(.green)
+                    }
+                }
 
                 Spacer()
 
