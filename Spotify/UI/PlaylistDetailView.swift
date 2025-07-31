@@ -74,6 +74,7 @@ struct PlaylistDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadTracks(for: playlist)
+            viewModel.albumDetailVM.fetchLikedTracks()
         }
         .sheet(isPresented: $showAddTrackSheet) {
             AddTrackSheetView(
