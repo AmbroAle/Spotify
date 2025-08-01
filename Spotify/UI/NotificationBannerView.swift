@@ -43,7 +43,6 @@ struct NotificationBannerView: View {
             .padding()
             .background(
                 ZStack {
-                    // Sfondo traslucido tipo vetro
                     Color.white.opacity(0.1)
                         .blur(radius: 10)
 
@@ -57,7 +56,6 @@ struct NotificationBannerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             )
             .overlay(
-                // Bordo con effetto vetro
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
             )
