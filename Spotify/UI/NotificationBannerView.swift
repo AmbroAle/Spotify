@@ -21,45 +21,49 @@ struct NotificationBannerView: View {
     private func bannerView(message: String) -> some View {
             HStack(spacing: 12) {
                 Image(systemName: "bell.fill")
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
                     .imageScale(.large)
-                
+
                 Text(message)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
                     .font(.system(size: 16, weight: .semibold))
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
                 Spacer()
 
-                Button(action: {
-                    notificationManager.inAppMessage = nil
-                }) {
+                Button {
+                    withAnimation {
+                        notificationManager.inAppMessage = nil
+                    }
+                } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white.opacity(0.85))
                         .imageScale(.medium)
                 }
             }
             .padding()
             .background(
-                ZStack {
-                    Color.white.opacity(0.1)
-                        .blur(radius: 10)
-
-                    LinearGradient(
-                        colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .blendMode(.overlay)
-                }
+                LinearGradient(
+                    colors: [Color.blue, Color.purple],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
+                    .stroke(Color.white.opacity(0.15), lineWidth: 1.2)
             )
-            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+            .shadow(color: Color.black.opacity(0.3), radius: 12, x: 0, y: 6)
             .padding(.horizontal, 16)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation {
+                        notificationManager.inAppMessage = nil
+                    }
+                }
+            }
         }
+
 }
