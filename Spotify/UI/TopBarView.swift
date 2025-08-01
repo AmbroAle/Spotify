@@ -21,13 +21,10 @@ struct TopBarView: View {
             }
             .buttonStyle(PlainButtonStyle())
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    tabButton(title: "Tutti")
-                    tabButton(title: "Artisti")
-                    tabButton(title: "Album")
-                    tabButton(title: "Classifiche")
-                }
+            HStack(spacing: 10) {
+                tabButton(title: "Artisti")
+                tabButton(title: "Album")
+                tabButton(title: "Classifiche")
             }
             .padding(.bottom, 5)
             Spacer()
@@ -39,7 +36,11 @@ struct TopBarView: View {
         LiquidGlassButton(
             title: title,
             action: {
-                selectedTab = title
+                if selectedTab == title {
+                    selectedTab = ""  // Torna alla home
+                } else {
+                    selectedTab = title  // Seleziona il nuovo tab
+                }
             },
             gradientColors: selectedTab == title
                 ? [

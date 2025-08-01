@@ -65,7 +65,7 @@ struct HomeView: View {
     @ViewBuilder
     private func contentView(for tab: String) -> some View {
         switch tab {
-        case "", "Tutti":
+        case "":
             ScrollView {
                 VStack(spacing: 24) {
                     TrackCarouselView()
