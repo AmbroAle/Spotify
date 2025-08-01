@@ -9,9 +9,14 @@ struct LibraryView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     
                     HStack {
-                        profileImageView
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
+                        NavigationLink(destination: 
+                            ProfileView(viewModel: profileViewModel)
+                            ) {
+                                profileImageView
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                            }
+                            .buttonStyle(PlainButtonStyle())
 
                         Text("La tua libreria")
                             .font(.title2)
