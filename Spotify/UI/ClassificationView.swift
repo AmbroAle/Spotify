@@ -15,7 +15,9 @@ struct ClassificationView: View {
                             .padding(.top, 32)
 
                         VStack(spacing: 16) {
-                            NavigationLink(destination: GlobalChartView()) {
+                            NavigationLink(destination:
+                                GlobalChartView()
+                            ) {
                                 classificationCard(
                                     imageName: "spotify-top-50-global",
                                     title: "Top Global",
@@ -23,7 +25,9 @@ struct ClassificationView: View {
                                 )
                             }
 
-                            NavigationLink(destination: CountryChartView(country: "italy")) {
+                            NavigationLink(destination:
+                                CountryChartView(country: "italy")
+                            ) {
                                 classificationCard(
                                     imageName: "region_it_default",
                                     title: "Top Country",
@@ -39,7 +43,6 @@ struct ClassificationView: View {
         }
     }
 
-    // MARK: - Card View
     @ViewBuilder
     func classificationCard(imageName: String, title: String, subtitle: String) -> some View {
         VStack {

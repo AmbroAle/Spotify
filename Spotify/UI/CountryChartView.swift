@@ -4,6 +4,7 @@ struct CountryChartView: View {
     let country: String
     @StateObject private var viewModel = ClassificationViewModel()
     @StateObject private var viewModelTrack = AlbumDetailViewModel()
+    @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -39,16 +40,20 @@ struct CountryChartView: View {
                             }
 
                             Button {
+                                let wasLiked = viewModelTrack.likedTracks.contains(track.id)
                                 viewModelTrack.toggleLike(for: track)
+                                
+                                // Mostra notifica
+                                showLikeNotification(for: track, wasLiked: wasLiked)
                             } label: {
                                 Image(systemName: viewModelTrack.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                                     .resizable()
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.green)
                             }
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
-                        .contentShape(Rectangle())
                     }
                 }
                 .padding(.vertical, 6)
@@ -57,6 +62,9 @@ struct CountryChartView: View {
             }
             .listStyle(.plain)
             .listRowSeparator(.hidden)
+        }
+        .overlay(alignment: .bottom) {
+            NotificationBannerView()
         }
         .navigationTitle("Top \(country)")
         .task {
@@ -76,5 +84,16 @@ struct CountryChartView: View {
                 }
             }
         }
+    }
+    
+    private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
+        
+        let message = wasLiked
+            ? "\"\(track.title)\" rimosso dai preferiti"
+            : "\"\(track.title)\" aggiunto ai preferiti"
+        
+        notificationManager.show(message: message)
     }
 }

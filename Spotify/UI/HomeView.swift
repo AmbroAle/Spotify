@@ -11,8 +11,6 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                NotificationBannerView().environmentObject(notificationManager)
-
                 VStack(spacing: 10) {
                     TopBarView(selectedTab: $selectedTab, profileViewModel: profileVM, showNotification: showInAppNotification)
                         .frame(maxWidth: .infinity)

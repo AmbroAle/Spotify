@@ -3,6 +3,7 @@ import SwiftUI
 struct GlobalChartView: View {
     @StateObject private var viewModel = ClassificationViewModel()
     @StateObject private var viewModelTrack = AlbumDetailViewModel()
+    @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -38,7 +39,9 @@ struct GlobalChartView: View {
                             }
 
                             Button(action: {
+                                let wasLiked = viewModelTrack.likedTracks.contains(track.id)
                                 viewModelTrack.toggleLike(for: track)
+                                showLikeNotification(for: track, wasLiked: wasLiked)
                             }) {
                                 Image(systemName: viewModelTrack.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                                     .resizable()
@@ -57,7 +60,9 @@ struct GlobalChartView: View {
             }
             .listStyle(.plain)
             .listRowSeparator(.hidden)
-
+        }
+        .overlay(alignment: .bottom) {
+            NotificationBannerView()
         }
         .navigationTitle("Top Global")
         .task {
@@ -77,5 +82,16 @@ struct GlobalChartView: View {
                 }
             }
         }
+    }
+    
+    private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
+        
+        let message = wasLiked
+            ? "\"\(track.title)\" rimosso dai preferiti"
+            : "\"\(track.title)\" aggiunto ai preferiti"
+        
+        notificationManager.show(message: message)
     }
 }
