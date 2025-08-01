@@ -4,6 +4,7 @@ struct TrackPlaylistRowView: View {
     let track: TrackAlbumDetail
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
+    @EnvironmentObject var notificationManager: NotificationManager
 
     var body: some View {
         HStack(spacing: 12) {
@@ -33,7 +34,10 @@ struct TrackPlaylistRowView: View {
                     }
 
                     Button(action: {
+                        let wasLiked = albumDetailVM.likedTracks.contains(track.id)
                         albumDetailVM.toggleLike(for: track)
+                        showLikeNotification(for: track, wasLiked: wasLiked)
+
                     }) {
                         Image(systemName: albumDetailVM.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                             .resizable()
@@ -48,5 +52,15 @@ struct TrackPlaylistRowView: View {
         .padding(.vertical, 6)
         .background(albumDetailVM.currentlyPlayingTrackID == track.id ? Color.green.opacity(0.1) : Color.clear)
         .cornerRadius(10)
+    }
+    private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
+                
+        let message = wasLiked
+            ? "\"\(track.title)\" rimosso dai preferiti"
+            : "\"\(track.title)\" aggiunto ai preferiti"
+            
+        notificationManager.show(message: message)
     }
 }

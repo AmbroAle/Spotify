@@ -5,6 +5,7 @@ struct PlaylistDetailView: View {
     @StateObject private var viewModel = PlaylistDetailViewModel()
     @StateObject private var albumDetailVM = AlbumDetailViewModel()
     @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
+    @EnvironmentObject var notificationManager: NotificationManager
 
     @State private var showAddTrackSheet = false
     @State private var searchText = ""
@@ -117,6 +118,8 @@ struct PlaylistDetailView: View {
                     }
                 }
             }
+            NotificationBannerView()
+                .environmentObject(notificationManager)
         }
         .navigationTitle("Playlist")
         .navigationBarTitleDisplayMode(.inline)

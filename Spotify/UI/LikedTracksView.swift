@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LikedTracksView: View {
     @StateObject private var viewModel = AlbumDetailViewModel()
+    @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -36,6 +37,8 @@ struct LikedTracksView: View {
                     }
                 }
             }
+            NotificationBannerView()
+                            .environmentObject(notificationManager)
         }
         .onAppear {
             viewModel.fetchFullLikedTracks()
