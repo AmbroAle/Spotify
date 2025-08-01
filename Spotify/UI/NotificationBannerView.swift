@@ -19,26 +19,49 @@ struct NotificationBannerView: View {
     }
     
     private func bannerView(message: String) -> some View {
-        HStack {
-            Image(systemName: "bell.fill") 
-                .foregroundColor(.white)
-            Text(message)
-                .foregroundColor(.white)
-                .fontWeight(.medium)
-            Spacer()
-            Button {
-                notificationManager.inAppMessage = nil
-            } label: {
-                Image(systemName: "xmark")
-                    .foregroundColor(.white)
+            HStack(spacing: 12) {
+                Image(systemName: "bell.fill")
+                    .foregroundColor(.white.opacity(0.9))
+                    .imageScale(.large)
+                
+                Text(message)
+                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                Spacer()
+
+                Button(action: {
+                    notificationManager.inAppMessage = nil
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.white.opacity(0.8))
+                        .imageScale(.medium)
+                }
             }
+            .padding()
+            .background(
+                ZStack {
+                    // Sfondo traslucido tipo vetro
+                    Color.white.opacity(0.1)
+                        .blur(radius: 10)
+
+                    LinearGradient(
+                        colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .blendMode(.overlay)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            )
+            .overlay(
+                // Bordo con effetto vetro
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
+            )
+            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 16)
         }
-        .padding()
-        .background(Color.blue)
-        .cornerRadius(12)
-        .shadow(radius: 5)
-        .padding(.horizontal)
-        .transition(.move(edge: .top))
-        .animation(.easeInOut, value: notificationManager.inAppMessage)
-    }
 }
