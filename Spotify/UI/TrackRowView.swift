@@ -4,6 +4,7 @@ struct TrackRowView: View {
     let track: TrackAlbumDetail
     let albumCoverURL: String
     @ObservedObject var viewModel: AlbumDetailViewModel
+    @EnvironmentObject var notificationManager: NotificationManager
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -40,7 +41,9 @@ struct TrackRowView: View {
                     }
 
                     Button(action: {
+                        let wasLiked = viewModel.likedTracks.contains(track.id)
                         viewModel.toggleLike(for: track)
+                        showLikeNotification(for: track, wasLiked: wasLiked)
                     }) {
                         Image(systemName: viewModel.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                             .resizable()
@@ -51,5 +54,15 @@ struct TrackRowView: View {
             }
         }
         .padding(.vertical, 6)
+    }
+    private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
+            
+        let message = wasLiked
+            ? "\"\(track.title)\" rimosso dai preferiti"
+            : "\"\(track.title)\" aggiunto ai preferiti"
+        
+        notificationManager.show(message: message)
     }
 }
