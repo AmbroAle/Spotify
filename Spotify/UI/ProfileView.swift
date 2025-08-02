@@ -1,10 +1,14 @@
 import SwiftUI
 import PhotosUI
+import LocalAuthentication
 
 struct ProfileView: View {
     @StateObject private var locationManager = LocationManager()
     @ObservedObject var viewModel = ProfileViewModel()
     @EnvironmentObject var appViewModel: AppViewModel
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var notificationManager: NotificationManager
+    @AppStorage("useBiometric") private var useBiometric = false
     @State private var showingPhotoPicker = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var showingCameraPicker = false
@@ -14,9 +18,7 @@ struct ProfileView: View {
     @State private var showingCacheInfo = false
     @State private var showingNotifySettings = false
     @State private var showingLocationSettings = false
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var notificationManager: NotificationManager
-
+    
     var body: some View {
         VStack(spacing: 20) {
             ZStack(alignment: .bottomTrailing) {
@@ -62,15 +64,19 @@ struct ProfileView: View {
                     showingNotifySettings = true
                 }
                 profileRow(icon: "lock.fill", text: "Password") {
-                    showingChangePassword = true
+                    if useBiometric {
+                        authenticateBeforeShowingChangePassword()
+                    } else {
+                        showingChangePassword = true
+                    }
                 }
+                profileRowWithToggle(icon: "faceid", text: "Face ID", isOn: $useBiometric)
                 profileRow(icon: "rectangle.portrait.and.arrow.right", text: "Logout") {
                     appViewModel.logout()
                 }
             }
             .sheet(isPresented: $showingChangePassword) {
                 ChangePasswordView().environmentObject(notificationManager)
-
             }
             .sheet(isPresented: $showingCacheInfo) {
                 CacheInfoView(viewModel: viewModel)
@@ -178,6 +184,67 @@ struct ProfileView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
+    private func authenticateBeforeShowingChangePassword() {
+        let context = LAContext()
+        var error: NSError?
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "Autenticati per accedere alla modifica password"
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
+                DispatchQueue.main.async {
+                    if success {
+                        showingChangePassword = true
+                    } else {
+                        notificationManager.show(message: "Autenticazione fallita")
+                    }
+                }
+            }
+        } else {
+            notificationManager.show(message: "Face ID non disponibile")
+        }
+    }
+
+    private func profileRowWithToggle(icon: String, text: String, isOn: Binding<Bool>) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.green)
+                .frame(width: 24)
+            Text(text)
+                .font(.body)
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { isOn.wrappedValue },
+                set: { newValue in
+                    if newValue {
+                        let context = LAContext()
+                        var error: NSError?
+
+                        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+                            let reason = "Autenticati per attivare il Face ID"
+                            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
+                                DispatchQueue.main.async {
+                                    if success {
+                                        isOn.wrappedValue = true
+                                    } else {
+                                        isOn.wrappedValue = false
+                                        notificationManager.show(message: "Autenticazione fallita")
+                                    }
+                                }
+                            }
+                        } else {
+                            isOn.wrappedValue = false
+                            notificationManager.show(message: "Face ID non disponibile")
+                        }
+                    } else {
+                        isOn.wrappedValue = false
+                    }
+                }
+            ))
+            .labelsHidden()
+        }
+        .padding(.vertical, 8)
+    }
+
 }
 
 struct CacheInfoView: View {
