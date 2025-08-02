@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
+    @StateObject private var locationManager = LocationManager()
     @ObservedObject var viewModel = ProfileViewModel()
     @EnvironmentObject var appViewModel: AppViewModel
     @State private var showingPhotoPicker = false
@@ -12,6 +13,7 @@ struct ProfileView: View {
     @State private var showingChangePassword = false
     @State private var showingCacheInfo = false
     @State private var showingNotifySettings = false
+    @State private var showingLocationSettings = false
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var notificationManager: NotificationManager
 
@@ -50,6 +52,9 @@ struct ProfileView: View {
                 profileRow(icon: "photo.fill", text: "Gestisci Foto Profilo") {
                     showingSavedImages = true
                 }
+                profileRow(icon: "location.circle.fill", text: "Posizione GPS") {
+                    showingLocationSettings = true
+                }
                 profileRow(icon: "externaldrive.fill", text: "Info Cache (\(viewModel.getCacheSize()))") {
                     showingCacheInfo = true
                 }
@@ -72,6 +77,9 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingNotifySettings) {
                 NotifyView()
+            }
+            .sheet(isPresented: $showingLocationSettings){
+                LocationSettingsView(locationManager: locationManager)
             }
             
             Spacer()
@@ -226,4 +234,5 @@ struct CacheInfoView: View {
             }
         }
     }
+    
 }
