@@ -18,6 +18,8 @@ struct ProfileView: View {
     @State private var showingCacheInfo = false
     @State private var showingNotifySettings = false
     @State private var showingLocationSettings = false
+    @State private var isTogglingBiometric = false
+    @State private var isAuthenticatingForPassword = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -184,7 +186,11 @@ struct ProfileView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
+    
     private func authenticateBeforeShowingChangePassword() {
+        guard !isAuthenticatingForPassword else { return }
+        isAuthenticatingForPassword = true
+        
         let context = LAContext()
         var error: NSError?
 
@@ -192,14 +198,18 @@ struct ProfileView: View {
             let reason = "Autenticati per accedere alla modifica password"
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
                 DispatchQueue.main.async {
+                    self.isAuthenticatingForPassword = false
+                    
                     if success {
-                        showingChangePassword = true
+                        self.showingChangePassword = true
                     } else {
-                        notificationManager.show(message: "Autenticazione fallita")
+                        // Mostra notifica solo se non è annullamento utente
+                        self.notificationManager.show(message: "Autenticazione fallita")
                     }
                 }
             }
         } else {
+            isAuthenticatingForPassword = false
             notificationManager.show(message: "Face ID non disponibile")
         }
     }
@@ -212,39 +222,81 @@ struct ProfileView: View {
             Text(text)
                 .font(.body)
             Spacer()
-            Toggle("", isOn: Binding(
-                get: { isOn.wrappedValue },
-                set: { newValue in
-                    if newValue {
-                        let context = LAContext()
-                        var error: NSError?
-
-                        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-                            let reason = "Autenticati per attivare il Face ID"
-                            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
-                                DispatchQueue.main.async {
-                                    if success {
-                                        isOn.wrappedValue = true
-                                    } else {
-                                        isOn.wrappedValue = false
-                                        notificationManager.show(message: "Autenticazione fallita")
-                                    }
-                                }
-                            }
-                        } else {
-                            isOn.wrappedValue = false
-                            notificationManager.show(message: "Face ID non disponibile")
-                        }
-                    } else {
-                        isOn.wrappedValue = false
-                    }
+            
+            // SOLUZIONE: Button invece di Toggle per controllo completo
+            Button(action: {
+                toggleBiometric()
+            }) {
+                HStack {
+                    Text(useBiometric ? "Attivo" : "Disattivo")
+                        .font(.system(size: 16))
+                        .foregroundColor(useBiometric ? .green : .gray)
+                    
+                    Image(systemName: useBiometric ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(useBiometric ? .green : .gray)
                 }
-            ))
-            .labelsHidden()
+            }
+            .disabled(isTogglingBiometric)
         }
         .padding(.vertical, 8)
     }
+    
+    private func toggleBiometric() {
+        guard !isTogglingBiometric else { return }
+        
+        // Se già attivo, disattiva senza autenticazione
+        if useBiometric {
+            useBiometric = false
+            return
+        }
+        
+        isTogglingBiometric = true
+        
+        let context = LAContext()
+        var error: NSError?
 
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "Autenticati per attivare il Face ID"
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authError in
+                DispatchQueue.main.async {
+                    self.isTogglingBiometric = false
+                    
+                    if success {
+                        self.useBiometric = true
+                    } else {
+                        let errorMessage = self.getBiometricErrorMessage(authError)
+                        self.notificationManager.show(message: errorMessage)
+                    }
+                }
+            }
+        } else {
+            isTogglingBiometric = false
+            let errorMessage = getBiometricErrorMessage(error)
+            notificationManager.show(message: errorMessage)
+        }
+    }
+    
+    // SOLUZIONE: Gestione errori migliorata
+    private func getBiometricErrorMessage(_ error: Error?) -> String {
+        guard let error = error as? LAError else {
+            return "Autenticazione fallita"
+        }
+        
+        switch error.code {
+        case .userCancel, .userFallback, .systemCancel:
+            return "Autenticazione annullata"
+        case .biometryNotAvailable:
+            return "Face ID non disponibile"
+        case .biometryNotEnrolled:
+            return "Face ID non configurato"
+        case .biometryLockout:
+            return "Face ID bloccato. Usa il passcode"
+        case .authenticationFailed:
+            return "Autenticazione fallita"
+        default:
+            return "Errore autenticazione"
+        }
+    }
 }
 
 struct CacheInfoView: View {
@@ -301,5 +353,4 @@ struct CacheInfoView: View {
             }
         }
     }
-    
 }
