@@ -55,14 +55,15 @@ struct TrackRowView: View {
         }
         .padding(.vertical, 6)
     }
+
     private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
         let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
         guard inAppEnabled else { return }
-            
+
         let message = wasLiked
             ? "\"\(track.title)\" rimosso dai preferiti"
             : "\"\(track.title)\" aggiunto ai preferiti"
-        
+
         notificationManager.show(message: message)
     }
 }

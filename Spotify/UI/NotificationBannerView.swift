@@ -5,25 +5,26 @@
 //  Created by Alex Frisoni on 30/07/25.
 //
 import SwiftUI
-import SwiftUI
 
 struct NotificationBannerView: View {
     @EnvironmentObject var notificationManager: NotificationManager
     @AppStorage("inAppNotificationsEnabled") private var inAppEnabled: Bool = true
 
     var body: some View {
-        if inAppEnabled, let message = notificationManager.inAppMessage {
-            bannerView(message: message)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
-                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: notificationManager.inAppMessage)
-        } else {
-            EmptyView()
+        VStack(spacing: 0) {
+            if inAppEnabled, let message = notificationManager.inAppMessage {
+                bannerView(message: message)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: notificationManager.inAppMessage)
+            }
+            Spacer() // Lo lasci sotto per spingere tutto verso l'alto
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
-    
+
     private func bannerView(message: String) -> some View {
         HStack(spacing: 16) {
             ZStack {
@@ -106,7 +107,7 @@ struct NotificationBannerView: View {
         .shadow(color: Color.green.opacity(0.3), radius: 15, x: 0, y: 8)
         .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
         .padding(.horizontal, 16)
-        .padding(.top, 8)
+        .padding(.top, max(UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0, 8))
         .onAppear {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()

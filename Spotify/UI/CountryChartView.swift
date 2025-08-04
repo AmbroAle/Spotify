@@ -63,9 +63,6 @@ struct CountryChartView: View {
             .listStyle(.plain)
             .listRowSeparator(.hidden)
         }
-        .overlay(alignment: .bottom) {
-            NotificationBannerView()
-        }
         .navigationTitle("Top \(country)")
         .task {
             await viewModel.fetchCountryCharts(country: country)

@@ -7,34 +7,39 @@ struct AlbumDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        List {
-            ForEach(viewModel.tracks) { track in
-                TrackRowView(track: track, albumCoverURL: album.cover_medium, viewModel: viewModel)
-                    .buttonStyle(.plain)
-            }
-        }
-        .navigationTitle(album.title)
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    viewModel.stopPlayback()
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.blue)
+        ZStack(alignment: .top) {
+            // Contenuto principale
+            List {
+                ForEach(viewModel.tracks) { track in
+                    TrackRowView(track: track, albumCoverURL: album.cover_medium, viewModel: viewModel)
+                        .buttonStyle(.plain)
                 }
             }
-        }
-        .onAppear {
-            Task {
-                await viewModel.fetchTracks(for: album.id)
-                viewModel.fetchLikedTracks()
+            .navigationTitle(album.title)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        viewModel.stopPlayback()
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.blue)
+                    }
+                }
             }
-        }
-        NotificationBannerView()
-            .environmentObject(notificationManager)
-               
+            .onAppear {
+                Task {
+                    await viewModel.fetchTracks(for: album.id)
+                    viewModel.fetchLikedTracks()
+                }
+            }
 
+            NotificationBannerView()
+                .environmentObject(notificationManager)
+                .padding(.top, 0)
+                .ignoresSafeArea(.all, edges: .top)
+
+        }
     }
 }

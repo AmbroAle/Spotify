@@ -61,9 +61,6 @@ struct GlobalChartView: View {
             .listStyle(.plain)
             .listRowSeparator(.hidden)
         }
-        .overlay(alignment: .bottom) {
-            NotificationBannerView()
-        }
         .navigationTitle("Top Global")
         .task {
             await viewModel.fetchGlobalCharts()

@@ -5,7 +5,7 @@ struct HomeView: View {
     @StateObject private var artistVM = ArtistViewModel()
     @StateObject private var albumVM = AlbumViewModel()
     @EnvironmentObject var profileVM: ProfileViewModel
-    @StateObject var notificationManager = NotificationManager()
+    @EnvironmentObject var notificationManager: NotificationManager
 
 
     var body: some View {

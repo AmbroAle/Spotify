@@ -76,19 +76,5 @@ struct CreatePlaylistView: View {
                 .fill(.ultraThinMaterial)
                 .edgesIgnoringSafeArea(.bottom)
         )
-        .overlay(
-            VStack {
-                NotificationBannerView()
-                    .environmentObject(notificationManager)
-                Spacer()
-            }
-        )
-        .overlay(
-            VStack {
-                NotificationBannerView()
-                    .environmentObject(notificationManager)
-                Spacer()
-            }
-        )
     }
 }
