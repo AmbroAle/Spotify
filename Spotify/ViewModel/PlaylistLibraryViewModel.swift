@@ -32,4 +32,27 @@ class PlaylistLibraryViewModel: ObservableObject {
                 }
             }
     }
+    
+    func deletePlaylist(_ playlist: Playlist) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.errorMessage = "Utente non autenticato"
+            return
+        }
+
+        if let index = playlists.firstIndex(where: { $0.id == playlist.id }) {
+            playlists.remove(at: index)
+        }
+
+        db.collection("users")
+            .document(uid)
+            .collection("playlists")
+            .document(playlist.id)
+            .delete { error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Errore durante l'eliminazione: \(error.localizedDescription)"
+                    }
+                }
+            }
+    }
 }

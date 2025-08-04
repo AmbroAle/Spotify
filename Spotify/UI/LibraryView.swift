@@ -3,102 +3,111 @@ import SwiftUI
 struct LibraryView: View {
     @StateObject private var viewModel = PlaylistLibraryViewModel()
     @ObservedObject var profileViewModel: ProfileViewModel
+
+    @State private var playlistToDelete: Playlist?
+    @State private var showDeleteConfirmation = false
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    
-                    HStack {
-                        NavigationLink(destination: 
-                            ProfileView(viewModel: profileViewModel)
-                            ) {
-                                profileImageView
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(PlainButtonStyle())
-
-                        Text("La tua libreria")
-                            .font(.title2)
-                            .bold()
-
-                        Spacer()
+            VStack(alignment: .leading, spacing: 24) {
+                
+                HStack {
+                    NavigationLink(destination: ProfileView(viewModel: profileViewModel)) {
+                        profileImageView
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
                     }
-                    .padding(.horizontal)
+                    .buttonStyle(PlainButtonStyle())
 
-                    VStack(alignment: .leading) {
-                        NavigationLink {
-                            LikedTracksView()
-                        } label: {
-                            HStack {
-                                Image(systemName: "heart.fill")
-                                    .foregroundColor(.green)
-                                    .frame(width: 24, height: 24)
+                    Text("La tua libreria")
+                        .font(.title2)
+                        .bold()
 
-                                Text("Brani che ti piacciono")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding()
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(12)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal)
-
-                    VStack(spacing: 12) {
-                        Text("Le tue playlist")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, alignment: .center)
-
-                        if viewModel.isLoading {
-                            ProgressView().padding()
-                        } else if viewModel.playlists.isEmpty {
-                            Text("Nessuna playlist trovata.")
-                                .foregroundColor(.gray)
-                                .padding(.horizontal)
-                        } else {
-                            ForEach(viewModel.playlists) { playlist in
-                                NavigationLink {
-                                    PlaylistDetailView(playlist: playlist)
-                                } label: {
-                                    HStack {
-                                        Image(systemName: "music.note.list")
-                                            .foregroundColor(.green)
-                                            .frame(width: 24, height: 24)
-
-                                        Text(playlist.name)
-                                            .font(.body)
-                                            .foregroundColor(.primary)
-
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                    .background(.thinMaterial)
-                                    .cornerRadius(10)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                    Spacer()
                 }
-                .padding(.top)
+                .padding(.horizontal)
+
+                VStack(alignment: .leading) {
+                    NavigationLink {
+                        LikedTracksView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.green)
+                                .frame(width: 24, height: 24)
+
+                            Text("Brani che ti piacciono")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal)
+
+                Text("Le tue playlist")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal)
+
+                if viewModel.isLoading {
+                    ProgressView().padding()
+                } else if viewModel.playlists.isEmpty {
+                    Text("Nessuna playlist trovata.")
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
+                } else {
+                    List {
+                        ForEach(viewModel.playlists) { playlist in
+                            NavigationLink(destination: PlaylistDetailView(playlist: playlist)) {
+                                HStack {
+                                    Image(systemName: "music.note.list")
+                                        .foregroundColor(.green)
+                                        .frame(width: 24, height: 24)
+
+                                    Text(playlist.name)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    playlistToDelete = playlist
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Elimina", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+
+                Spacer()
             }
+            .padding(.top)
             .navigationTitle("")
             .task {
                 viewModel.fetchPlaylists()
             }
+            .alert("Elimina Playlist", isPresented: $showDeleteConfirmation, presenting: playlistToDelete) { playlist in
+                Button("Elimina", role: .destructive) {
+                    viewModel.deletePlaylist(playlist)
+                }
+                Button("Annulla", role: .cancel) {}
+            } message: { playlist in
+                Text("Sei sicuro di voler eliminare \"\(playlist.name)\"?")
+            }
         }
     }
+
     @ViewBuilder
     private var profileImageView: some View {
         if let imageData = profileViewModel.pickedImageData,
