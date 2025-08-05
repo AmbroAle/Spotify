@@ -107,7 +107,7 @@ struct NotificationBannerView: View {
         .shadow(color: Color.green.opacity(0.3), radius: 15, x: 0, y: 8)
         .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
         .padding(.horizontal, 16)
-        .padding(.top, max(UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0, 8))
+        .padding(.top, max(getSafeAreaTopInset(), 8))
         .onAppear {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -118,5 +118,12 @@ struct NotificationBannerView: View {
                 }
             }
         }
+    }
+    private func getSafeAreaTopInset() -> CGFloat {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else {
+            return 0
+        }
+        return window.safeAreaInsets.top
     }
 }
