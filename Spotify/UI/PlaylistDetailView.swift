@@ -118,8 +118,6 @@ struct PlaylistDetailView: View {
                     }
                 }
             }
-            NotificationBannerView()
-                .environmentObject(notificationManager)
         }
         .navigationTitle("Playlist")
         .navigationBarTitleDisplayMode(.inline)
