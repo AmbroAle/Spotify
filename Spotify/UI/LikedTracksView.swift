@@ -37,8 +37,6 @@ struct LikedTracksView: View {
                     }
                 }
             }
-            NotificationBannerView()
-                            .environmentObject(notificationManager)
         }
         .onAppear {
             viewModel.fetchFullLikedTracks()
