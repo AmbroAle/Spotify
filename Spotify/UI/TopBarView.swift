@@ -11,7 +11,6 @@ struct TopBarView: View {
             NavigationLink(destination:
                 ProfileView(viewModel: profileViewModel)
                     .environmentObject(notificationManager)
-                    .overlay(NotificationBannerView())
             ){
                 profileImageView
                     .scaledToFill()

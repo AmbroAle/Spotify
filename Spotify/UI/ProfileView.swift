@@ -93,11 +93,6 @@ struct ProfileView: View {
             Spacer()
         }
         .padding()
-        .overlay(
-            NotificationBannerView()
-                .environmentObject(notificationManager)
-                , alignment: .top
-        )
         .onAppear {
             viewModel.fetchUserProfile()
             Task {
