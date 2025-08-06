@@ -6,7 +6,8 @@ class AppViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var errorMessage: String?
     @Published var isRegistered = false
-    
+    var profileViewModel: ProfileViewModel?
+
     private let db = Firestore.firestore()
     
 
