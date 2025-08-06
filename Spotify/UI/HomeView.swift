@@ -6,6 +6,7 @@ struct HomeView: View {
     @StateObject private var albumVM = AlbumViewModel()
     @EnvironmentObject var profileVM: ProfileViewModel
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var appViewModel: AppViewModel
 
 
     var body: some View {
@@ -14,7 +15,7 @@ struct HomeView: View {
                 VStack(spacing: 10) {
                     TopBarView(selectedTab: $selectedTab, profileViewModel: profileVM, showNotification: showInAppNotification)
                         .frame(maxWidth: .infinity)
-                    
+                        .environmentObject(appViewModel)
                     contentView(for: selectedTab)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -51,6 +52,10 @@ struct HomeView: View {
             .environmentObject(notificationManager)
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            appViewModel.profileViewModel = profileVM
+            profileVM.fetchUserProfile()
+        }
     }
     
     func showInAppNotification(_ message: String) {
@@ -92,8 +97,6 @@ struct HomeView: View {
         }
     }
 }
-
-
 #Preview {
     HomeView()
 }

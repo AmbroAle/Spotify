@@ -4,6 +4,7 @@ struct TopBarView: View {
     @Binding var selectedTab: String
     @ObservedObject var profileViewModel: ProfileViewModel
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var appViewModel: AppViewModel
     var showNotification: (String) -> Void
 
     var body: some View {
@@ -29,6 +30,13 @@ struct TopBarView: View {
             Spacer()
         }
         .frame(maxWidth: UIScreen.main.bounds.width)
+        .onChange(of: appViewModel.isAuthenticated) { oldValue, newValue in
+            if newValue {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    profileViewModel.fetchUserProfile()
+                }
+            }
+        }
     }
     
     private func tabButton(title: String) -> some View {
