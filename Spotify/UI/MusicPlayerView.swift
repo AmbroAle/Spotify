@@ -130,9 +130,10 @@ struct MusicPlayerView: View {
             checkIfLiked()
             setupInitialState()
         }
-        .onChange(of: currentIndex) { _ in
+        .onChange(of: currentIndex) {
             checkIfLiked()
         }
+
     }
     
     @ViewBuilder
