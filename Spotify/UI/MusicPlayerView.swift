@@ -13,6 +13,7 @@ struct MusicPlayerView: View {
     let track: TrackAlbumDetail
     let trackList: [TrackAlbumDetail]
     let currentIndex: Int
+    let albumCoverURL: String
     @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @Environment(\.dismiss) private var dismiss
@@ -136,8 +137,8 @@ struct MusicPlayerView: View {
     
     @ViewBuilder
     private var albumCoverView: some View {
-        if let coverString = currentTrack.cover_medium,
-           let url = URL(string: coverString) {
+        let coverString = currentTrack.cover_medium ?? albumCoverURL
+        if let url = URL(string: coverString) {
             AsyncImage(url: url) { image in
                 image
                     .resizable()
@@ -160,6 +161,8 @@ struct MusicPlayerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         }
     }
+
+
     
     private var isCurrentlyPlaying: Bool {
         playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id ||
@@ -288,10 +291,13 @@ struct PlayableTrackRow: View {
                 track: track,
                 trackList: trackList,
                 currentIndex: currentIndex,
+                albumCoverURL: albumCoverURL, // <-- aggiunto
                 playlistPlayerVM: playlistPlayerVM,
                 albumDetailVM: albumDetailVM
             )
         }
+
+
     }
 
     private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
