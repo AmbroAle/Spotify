@@ -15,13 +15,14 @@ struct AlbumDetailView: View {
                     PlayableTrackRow(
                         track: track,
                         trackList: viewModel.tracks,
-                        currentIndex: index,
+                        currentIndex: index,           // <-- qui
                         albumCoverURL: album.cover_medium,
                         albumDetailVM: viewModel,
                         playlistPlayerVM: playlistPlayerVM
                     )
                     .buttonStyle(.plain)
                 }
+
             }
             .navigationTitle(album.title)
             .navigationBarBackButtonHidden()

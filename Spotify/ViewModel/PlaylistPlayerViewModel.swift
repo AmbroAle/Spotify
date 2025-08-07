@@ -6,6 +6,7 @@ class PlaylistPlayerViewModel: ObservableObject {
     @Published var currentlyPlayingTrackID: Int?
     @Published var isPaused: Bool = false
     @Published var currentIndex: Int = 0  // Rendi questa proprietà pubblica
+    @Published var isPlaying: Bool = false
 
     private var audioPlayer: AVPlayer?
     private var tracks: [TrackAlbumDetail] = []
@@ -64,16 +65,22 @@ class PlaylistPlayerViewModel: ObservableObject {
     }
 
     func togglePlayPause() {
-        guard let player = audioPlayer else { return }
-
-        if isPaused {
-            player.play()
-        } else {
-            player.pause()
+        guard let player = audioPlayer else {
+            playTrack(at: currentIndex)
+            return
         }
 
-        isPaused.toggle()
+        if isPlaying {
+            player.pause()
+            isPlaying = false
+        } else {
+            player.play()
+            isPlaying = true
+        }
     }
+
+
+
 
     func playNextTrack() {
         guard hasNext else {
@@ -92,9 +99,11 @@ class PlaylistPlayerViewModel: ObservableObject {
         audioPlayer?.pause()
         audioPlayer = nil
         isPaused = false
+        isPlaying = false    // ✅ AGGIUNGI QUESTA RIGA
         currentlyPlayingTrackID = nil
         NotificationCenter.default.removeObserver(self)
     }
+
     
     // Metodo per trovare l'indice di una traccia specifica
     func findTrackIndex(_ trackID: Int) -> Int? {

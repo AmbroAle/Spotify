@@ -10,20 +10,32 @@ import SwiftUI
 import Foundation
 
 struct MusicPlayerView: View {
-    let track: TrackAlbumDetail
     let trackList: [TrackAlbumDetail]
-    let currentIndex: Int
     let albumCoverURL: String
     @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var isLiked: Bool = false
-    
-    // Computed properties per la navigazione
-    private var hasPrevious: Bool { currentIndex > 0 }
-    private var hasNext: Bool { currentIndex < trackList.count - 1 }
-    private var currentTrack: TrackAlbumDetail { trackList[currentIndex] }
-    
+    private var currentTrack: TrackAlbumDetail {
+            playlistPlayerVM.currentTrack!
+        }
+
+        private var currentIndex: Int {
+            playlistPlayerVM.currentIndex
+        }
+
+        private var hasPrevious: Bool {
+            playlistPlayerVM.hasPrevious
+        }
+
+        private var hasNext: Bool {
+            playlistPlayerVM.hasNext
+        }
+
+        private var isCurrentlyPlaying: Bool {
+            playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id && playlistPlayerVM.isPlaying
+        }
+
     var body: some View {
         ZStack {
             // Background gradient
@@ -165,10 +177,7 @@ struct MusicPlayerView: View {
 
 
     
-    private var isCurrentlyPlaying: Bool {
-        playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id ||
-        albumDetailVM.currentlyPlayingTrackID == currentTrack.id
-    }
+    
     
     private func setupInitialState() {
         // Configura la playlist nel PlaylistPlayerViewModel se non è già configurata
@@ -285,19 +294,17 @@ struct PlayableTrackRow: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle()) // Rende tutta l'area tappabile
         .onTapGesture {
+            playlistPlayerVM.setCurrentTrack(at: currentIndex)
             showingMusicPlayer = true
         }
         .fullScreenCover(isPresented: $showingMusicPlayer) {
             MusicPlayerView(
-                track: track,
                 trackList: trackList,
-                currentIndex: currentIndex,
-                albumCoverURL: albumCoverURL, // <-- aggiunto
+                albumCoverURL: albumCoverURL,
                 playlistPlayerVM: playlistPlayerVM,
                 albumDetailVM: albumDetailVM
             )
         }
-
 
     }
 
