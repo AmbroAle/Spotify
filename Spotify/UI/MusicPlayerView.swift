@@ -4,11 +4,8 @@
 //
 //  Created by Alex Frisoni on 07/08/25.
 //
-
-
 import SwiftUI
 import Foundation
-
 struct MusicPlayerView: View {
     let trackList: [TrackAlbumDetail]
     let albumCoverURL: String
@@ -16,29 +13,29 @@ struct MusicPlayerView: View {
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var isLiked: Bool = false
+    
     private var currentTrack: TrackAlbumDetail {
-            playlistPlayerVM.currentTrack!
-        }
-
-        private var currentIndex: Int {
-            playlistPlayerVM.currentIndex
-        }
-
-        private var hasPrevious: Bool {
-            playlistPlayerVM.hasPrevious
-        }
-
-        private var hasNext: Bool {
-            playlistPlayerVM.hasNext
-        }
-
-        private var isCurrentlyPlaying: Bool {
-            playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id && playlistPlayerVM.isPlaying
-        }
-
+        playlistPlayerVM.currentTrack!
+    }
+    
+    private var currentIndex: Int {
+        playlistPlayerVM.currentIndex
+    }
+    
+    private var hasPrevious: Bool {
+        playlistPlayerVM.hasPrevious
+    }
+    
+    private var hasNext: Bool {
+        playlistPlayerVM.hasNext
+    }
+    
+    private var isCurrentlyPlaying: Bool {
+        playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id && playlistPlayerVM.isPlaying
+    }
+    
     var body: some View {
         ZStack {
-            // Background gradient
             LinearGradient(
                 colors: [.black.opacity(0.8), .gray.opacity(0.3)],
                 startPoint: .topLeading,
@@ -47,7 +44,6 @@ struct MusicPlayerView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 30) {
-                // Header con dismiss button
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.down")
@@ -64,14 +60,12 @@ struct MusicPlayerView: View {
                 
                 Spacer()
                 
-                // Album cover
                 albumCoverView
                     .frame(maxWidth: 300, maxHeight: 300)
                     .shadow(radius: 20)
                 
                 Spacer()
                 
-                // Track info
                 VStack(spacing: 8) {
                     Text(currentTrack.title)
                         .font(.title2)
@@ -88,9 +82,7 @@ struct MusicPlayerView: View {
                 
                 Spacer()
                 
-                // Controls
                 VStack(spacing: 20) {
-                    // Like button
                     HStack {
                         Spacer()
                         Button(action: toggleLike) {
@@ -101,9 +93,7 @@ struct MusicPlayerView: View {
                         Spacer()
                     }
                     
-                    // Main controls
                     HStack(spacing: 50) {
-                        // Previous button
                         Button(action: previousTrack) {
                             Image(systemName: "backward.fill")
                                 .font(.title)
@@ -111,14 +101,12 @@ struct MusicPlayerView: View {
                         }
                         .disabled(!hasPrevious)
                         
-                        // Play/Pause button
                         Button(action: togglePlayPause) {
                             Image(systemName: isCurrentlyPlaying ? "pause.circle.fill" : "play.circle.fill")
                                 .font(.system(size: 70))
                                 .foregroundColor(.green)
                         }
                         
-                        // Next button
                         Button(action: nextTrack) {
                             Image(systemName: "forward.fill")
                                 .font(.title)
@@ -127,7 +115,6 @@ struct MusicPlayerView: View {
                         .disabled(!hasNext)
                     }
                     
-                    // Progress indicator (se disponibile)
                     if !currentTrack.preview.isEmpty {
                         Text("Preview - 30 secondi")
                             .font(.caption)
@@ -145,7 +132,6 @@ struct MusicPlayerView: View {
         .onChange(of: currentIndex) {
             checkIfLiked()
         }
-
     }
     
     @ViewBuilder
@@ -174,23 +160,16 @@ struct MusicPlayerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         }
     }
-
-
-    
-    
     
     private func setupInitialState() {
-        // Configura la playlist nel PlaylistPlayerViewModel se non è già configurata
         playlistPlayerVM.setPlaylist(trackList)
     }
     
     private func togglePlayPause() {
         if isCurrentlyPlaying {
-            // Se sta suonando, metti in pausa
             playlistPlayerVM.togglePlayPause()
             albumDetailVM.stopPlayback()
         } else {
-            // Se non sta suonando, avvia la riproduzione
             albumDetailVM.stopPlayback()
             playlistPlayerVM.stopPlayback()
             playlistPlayerVM.playTrack(at: currentIndex)
@@ -199,14 +178,12 @@ struct MusicPlayerView: View {
     
     private func previousTrack() {
         guard hasPrevious else { return }
-        let newIndex = currentIndex - 1
-        playlistPlayerVM.playTrack(at: newIndex)
+        playlistPlayerVM.playTrack(at: currentIndex - 1)
     }
     
     private func nextTrack() {
         guard hasNext else { return }
-        let newIndex = currentIndex + 1
-        playlistPlayerVM.playTrack(at: newIndex)
+        playlistPlayerVM.playTrack(at: currentIndex + 1)
     }
     
     private func toggleLike() {
@@ -219,18 +196,6 @@ struct MusicPlayerView: View {
     }
 }
 
-// MARK: - Estensione per TrackRowView
-extension TrackRowView {
-    // Aggiungi questo modificatore per aprire il player
-    func onTapGesture(trackList: [TrackAlbumDetail], currentIndex: Int, playlistPlayerVM: PlaylistPlayerViewModel) -> some View {
-        self.onTapGesture {
-            // Qui potresti aggiungere la navigazione al MusicPlayerView
-            // Oppure usare un sheet
-        }
-    }
-}
-
-// MARK: - Vista per l'integrazione nelle liste
 struct PlayableTrackRow: View {
     let track: TrackAlbumDetail
     let trackList: [TrackAlbumDetail]
@@ -243,7 +208,6 @@ struct PlayableTrackRow: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Album cover
             AsyncImage(url: URL(string: track.cover_medium ?? albumCoverURL)) { image in
                 image
                     .resizable()
@@ -263,13 +227,13 @@ struct PlayableTrackRow: View {
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
                         Button(action: {
-                            let isNewTrack = albumDetailVM.currentlyPlayingTrackID != track.id
-                            if isNewTrack {
-                                albumDetailVM.saveRecentTrack(track)
+                            if playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying {
+                                playlistPlayerVM.togglePlayPause()
+                            } else {
+                                playlistPlayerVM.playTrack(at: currentIndex)
                             }
-                            albumDetailVM.playOrPause(track: track)
                         }) {
-                            Image(systemName: albumDetailVM.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
+                            Image(systemName: playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.green)
@@ -292,7 +256,7 @@ struct PlayableTrackRow: View {
             Spacer()
         }
         .padding(.vertical, 6)
-        .contentShape(Rectangle()) // Rende tutta l'area tappabile
+        .contentShape(Rectangle())
         .onTapGesture {
             playlistPlayerVM.setCurrentTrack(at: currentIndex)
             showingMusicPlayer = true
@@ -305,17 +269,16 @@ struct PlayableTrackRow: View {
                 albumDetailVM: albumDetailVM
             )
         }
-
     }
-
+    
     private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
         let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
         guard inAppEnabled else { return }
-
+        
         let message = wasLiked
             ? "\"\(track.title)\" rimosso dai preferiti"
             : "\"\(track.title)\" aggiunto ai preferiti"
-
+        
         notificationManager.show(message: message)
     }
 }

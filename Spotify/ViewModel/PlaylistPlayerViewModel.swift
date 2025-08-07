@@ -5,13 +5,12 @@ import AVFoundation
 class PlaylistPlayerViewModel: ObservableObject {
     @Published var currentlyPlayingTrackID: Int?
     @Published var isPaused: Bool = false
-    @Published var currentIndex: Int = 0  // Rendi questa proprietà pubblica
+    @Published var currentIndex: Int = 0
     @Published var isPlaying: Bool = false
 
     private var audioPlayer: AVPlayer?
     private var tracks: [TrackAlbumDetail] = []
     
-    // Proprietà pubbliche per l'interfaccia
     var currentTrack: TrackAlbumDetail? {
         guard currentIndex < tracks.count else { return nil }
         return tracks[currentIndex]
@@ -22,7 +21,6 @@ class PlaylistPlayerViewModel: ObservableObject {
 
     func setPlaylist(_ tracks: [TrackAlbumDetail]) {
         self.tracks = tracks
-        // Non resettare l'indice se stiamo aggiornando la stessa playlist
     }
 
     func playPlaylist(startingAt index: Int = 0) {
@@ -41,7 +39,6 @@ class PlaylistPlayerViewModel: ObservableObject {
         let track = tracks[index]
         
         guard let url = URL(string: track.preview), !track.preview.isEmpty else {
-            // Se questa traccia non ha preview, prova la successiva
             playNextTrack()
             return
         }
@@ -49,6 +46,8 @@ class PlaylistPlayerViewModel: ObservableObject {
         let playerItem = AVPlayerItem(url: url)
         audioPlayer = AVPlayer(playerItem: playerItem)
         audioPlayer?.play()
+        
+        isPlaying = true      // importante per aggiornare lo stato play/pause
         isPaused = false
         currentlyPlayingTrackID = track.id
 
@@ -79,9 +78,6 @@ class PlaylistPlayerViewModel: ObservableObject {
         }
     }
 
-
-
-
     func playNextTrack() {
         guard hasNext else {
             stopPlayback()
@@ -99,18 +95,15 @@ class PlaylistPlayerViewModel: ObservableObject {
         audioPlayer?.pause()
         audioPlayer = nil
         isPaused = false
-        isPlaying = false    // ✅ AGGIUNGI QUESTA RIGA
+        isPlaying = false
         currentlyPlayingTrackID = nil
         NotificationCenter.default.removeObserver(self)
     }
 
-    
-    // Metodo per trovare l'indice di una traccia specifica
     func findTrackIndex(_ trackID: Int) -> Int? {
         return tracks.firstIndex { $0.id == trackID }
     }
     
-    // Metodo per impostare la traccia corrente senza avviare la riproduzione
     func setCurrentTrack(at index: Int) {
         guard index >= 0 && index < tracks.count else { return }
         currentIndex = index
