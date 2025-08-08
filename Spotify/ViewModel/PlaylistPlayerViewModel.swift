@@ -7,6 +7,9 @@ class PlaylistPlayerViewModel: ObservableObject {
     @Published var isPaused: Bool = false
     @Published var currentIndex: Int = 0
     @Published var isPlaying: Bool = false
+    var hasAudioPlayer: Bool {
+        audioPlayer != nil
+    }
 
     private var audioPlayer: AVPlayer?
     private var tracks: [TrackAlbumDetail] = []

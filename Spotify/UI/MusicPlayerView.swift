@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Foundation
+
 struct MusicPlayerView: View {
     let trackList: [TrackAlbumDetail]
     let albumCoverURL: String
@@ -128,6 +129,7 @@ struct MusicPlayerView: View {
         .onAppear {
             checkIfLiked()
             setupInitialState()
+            //debugPlaybackState()
         }
         .onChange(of: currentIndex) {
             checkIfLiked()
@@ -166,13 +168,12 @@ struct MusicPlayerView: View {
     }
     
     private func togglePlayPause() {
-        if isCurrentlyPlaying {
-            playlistPlayerVM.togglePlayPause()
+        // Usa SOLO il PlaylistPlayerViewModel per gestire play/pause
+        playlistPlayerVM.togglePlayPause()
+        
+        // Ferma AlbumDetailVM solo se necessario (per evitare conflitti)
+        if playlistPlayerVM.isPlaying {
             albumDetailVM.stopPlayback()
-        } else {
-            albumDetailVM.stopPlayback()
-            playlistPlayerVM.stopPlayback()
-            playlistPlayerVM.playTrack(at: currentIndex)
         }
     }
     
@@ -227,13 +228,18 @@ struct PlayableTrackRow: View {
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
                         Button(action: {
-                            if playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying {
+
+                            if playlistPlayerVM.currentlyPlayingTrackID == track.id {
                                 playlistPlayerVM.togglePlayPause()
                             } else {
+                                // Ferma altre riproduzioni
+                                albumDetailVM.stopPlayback()
+                                // Imposta e avvia la nuova traccia
+                                playlistPlayerVM.setCurrentTrack(at: currentIndex)
                                 playlistPlayerVM.playTrack(at: currentIndex)
                             }
                         }) {
-                            Image(systemName: playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                            Image(systemName: (playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying) ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.green)
