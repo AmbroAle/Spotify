@@ -3,19 +3,18 @@ import SwiftUI
 struct AlbumDetailView: View {
     let album: Album
     @StateObject private var viewModel = AlbumDetailViewModel()
-    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel() // Aggiungi questo
+    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
     @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack(alignment: .top) {
-            // Contenuto principale
             List {
                 ForEach(Array(viewModel.tracks.enumerated()), id: \.element.id) { index, track in
                     PlayableTrackRow(
                         track: track,
                         trackList: viewModel.tracks,
-                        currentIndex: index,           // <-- qui
+                        currentIndex: index,
                         albumCoverURL: album.cover_medium,
                         albumDetailVM: viewModel,
                         playlistPlayerVM: playlistPlayerVM
@@ -30,7 +29,7 @@ struct AlbumDetailView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         viewModel.stopPlayback()
-                        playlistPlayerVM.stopPlayback() // Aggiungi questo
+                        playlistPlayerVM.stopPlayback()
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
@@ -42,7 +41,6 @@ struct AlbumDetailView: View {
                 Task {
                     await viewModel.fetchTracks(for: album.id)
                     viewModel.fetchLikedTracks()
-                    // Configura la playlist nel player
                     playlistPlayerVM.setPlaylist(viewModel.tracks)
                 }
             }
@@ -55,8 +53,6 @@ struct AlbumDetailView: View {
     }
 }
 
-// ALTERNATIVA: Se preferisci mantenere TrackRowView esistente
-// Puoi aggiungere un modificatore per aprire il player
 
 extension TrackRowView {
     func withMusicPlayer(
@@ -68,7 +64,6 @@ extension TrackRowView {
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    // Apri il music player
                 }
         )
     }

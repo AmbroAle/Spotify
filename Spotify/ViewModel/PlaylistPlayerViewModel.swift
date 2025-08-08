@@ -47,7 +47,7 @@ class PlaylistPlayerViewModel: ObservableObject {
         audioPlayer = AVPlayer(playerItem: playerItem)
         audioPlayer?.play()
         
-        isPlaying = true      // importante per aggiornare lo stato play/pause
+        isPlaying = true     
         isPaused = false
         currentlyPlayingTrackID = track.id
 
