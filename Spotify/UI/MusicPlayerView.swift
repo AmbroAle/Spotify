@@ -129,7 +129,6 @@ struct MusicPlayerView: View {
         .onAppear {
             checkIfLiked()
             setupInitialState()
-            //debugPlaybackState()
         }
         .onChange(of: currentIndex) {
             checkIfLiked()
@@ -168,11 +167,8 @@ struct MusicPlayerView: View {
     }
     
     private func togglePlayPause() {
-        // Usa SOLO il PlaylistPlayerViewModel per gestire play/pause
         playlistPlayerVM.togglePlayPause()
-        
-        // Ferma AlbumDetailVM solo se necessario (per evitare conflitti)
-        if playlistPlayerVM.isPlaying {
+                if playlistPlayerVM.isPlaying {
             albumDetailVM.stopPlayback()
         }
     }
@@ -232,9 +228,7 @@ struct PlayableTrackRow: View {
                             if playlistPlayerVM.currentlyPlayingTrackID == track.id {
                                 playlistPlayerVM.togglePlayPause()
                             } else {
-                                // Ferma altre riproduzioni
                                 albumDetailVM.stopPlayback()
-                                // Imposta e avvia la nuova traccia
                                 playlistPlayerVM.setCurrentTrack(at: currentIndex)
                                 playlistPlayerVM.playTrack(at: currentIndex)
                             }
