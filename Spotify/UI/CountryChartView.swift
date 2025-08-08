@@ -10,7 +10,6 @@ struct CountryChartView: View {
 
     var body: some View {
         VStack {
-                                // Mostra notifica
             List {
                 ForEach(Array(viewModel.deezerTracks.enumerated()), id: \.element.id) { index, track in
                     PlayableTrackRowDeezer(
@@ -68,45 +67,66 @@ struct PlayableTrackRowDeezer: View {
     let albumCoverURL: String
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
-
+    @EnvironmentObject var notificationManager: NotificationManager
     @State private var showingPlayer = false
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             AsyncImage(url: URL(string: albumCoverURL)) { image in
                 image.resizable().scaledToFill()
             } placeholder: {
                 Color.gray
             }
-            .frame(width: 50, height: 50)
-            .cornerRadius(5)
+            .frame(width: 60, height: 60)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            VStack(alignment: .leading) {
-                Text(track.title ?? "Senza titolo")
+            VStack(alignment: .leading, spacing: 6) {
+                Text(track.title)
                     .font(.headline)
-                Text(track.artistName ?? "Sconosciuto")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            Spacer()
-            Button(action: {
-                let isNewTrack = albumDetailVM.currentlyPlayingTrackID != track.id
-                if isNewTrack {
-                    albumDetailVM.saveRecentTrack(track)
+                    .lineLimit(1)
+
+                HStack(spacing: 12) {
+                    if !track.preview.isEmpty {
+                        Button {
+                            let isNewTrack = albumDetailVM.currentlyPlayingTrackID != track.id
+                            if isNewTrack {
+                                albumDetailVM.saveRecentTrack(track)
+                            }
+                            albumDetailVM.playOrPause(track: track)
+                        } label: {
+                            Image(systemName: albumDetailVM.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                                .foregroundColor(.green)
+                        }
+                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                    }
+
+                    Button {
+                        let wasLiked = albumDetailVM.likedTracks.contains(track.id)
+                        albumDetailVM.toggleLike(for: track)
+
+                        // Notifica
+                        showLikeNotification(for: track, wasLiked: wasLiked)
+                    } label: {
+                        Image(systemName: albumDetailVM.likedTracks.contains(track.id) ? "heart.fill" : "heart")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(.green)
+                    }
+                    .buttonStyle(.plain)
+                    .contentShape(Rectangle())
                 }
-                albumDetailVM.playOrPause(track: track)
-            }) {
-                Image(systemName: albumDetailVM.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.green)
             }
+
+            Spacer()
         }
+        .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onTapGesture {
             playlistPlayerVM.setPlaylist(trackList)
             playlistPlayerVM.playTrack(at: currentIndex)
-
             showingPlayer = true
         }
         .fullScreenCover(isPresented: $showingPlayer) {
@@ -117,5 +137,16 @@ struct PlayableTrackRowDeezer: View {
                 albumDetailVM: albumDetailVM
             )
         }
+    }
+    
+    private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
+        let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
+        guard inAppEnabled else { return }
+
+        let message = wasLiked
+            ? "\"\(track.title)\" rimosso dai preferiti"
+            : "\"\(track.title)\" aggiunto ai preferiti"
+
+        notificationManager.show(message: message)
     }
 }
