@@ -17,7 +17,6 @@ struct AlbumDetailView: View {
                         currentIndex: index,
                         albumCoverURL: album.cover_medium,
                         albumDetailVM: viewModel,
-                        playlistPlayerVM: playlistPlayerVM
                     )
                     .buttonStyle(.plain)
                 }
