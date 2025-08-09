@@ -68,9 +68,12 @@ struct GlobalChartView: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     playlistPlayerVM.setPlaylist(viewModel.deezerTracks)
-                    playlistPlayerVM.setCurrentTrack(at: index)
-                    selectedIndex = index
-                    showingPlayer = true
+                    if playlistPlayerVM.currentlyPlayingTrackID == track.id {
+                        showingPlayer = true
+                    } else {
+                        playlistPlayerVM.playTrack(at: index)
+                        showingPlayer = true
+                    }
                 }
             }
             .listStyle(.plain)

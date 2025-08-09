@@ -106,9 +106,6 @@ struct PlaylistDetailView: View {
                                 showingPlayer = true
                             }
                         }
-
-
-
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {

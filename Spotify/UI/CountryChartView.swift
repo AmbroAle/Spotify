@@ -129,10 +129,13 @@ struct PlayableTrackRowDeezer: View {
         .contentShape(Rectangle())
         .onTapGesture {
             playlistPlayerVM.setPlaylist(trackList)
-            playlistPlayerVM.setCurrentTrack(at: currentIndex)
-            showingPlayer = true
+            if playlistPlayerVM.currentlyPlayingTrackID == track.id {
+                showingPlayer = true
+            } else {
+                playlistPlayerVM.playTrack(at: currentIndex)
+                showingPlayer = true
+            }
         }
-
         .fullScreenCover(isPresented: $showingPlayer) {
             MusicPlayerView(
                 trackList: trackList,
