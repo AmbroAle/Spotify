@@ -87,20 +87,23 @@ struct PlayableTrackRowDeezer: View {
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
                         Button {
-                            let isNewTrack = albumDetailVM.currentlyPlayingTrackID != track.id
-                            if isNewTrack {
-                                albumDetailVM.saveRecentTrack(track)
+                            if playlistPlayerVM.currentlyPlayingTrackID == track.id {
+                                playlistPlayerVM.togglePlayPause()
+                            } else {
+                                albumDetailVM.stopPlayback()
+                                playlistPlayerVM.setPlaylist(trackList) // assicura che sia settata
+                                playlistPlayerVM.playTrack(at: currentIndex)
                             }
-                            albumDetailVM.playOrPause(track: track)
                         } label: {
-                            Image(systemName: albumDetailVM.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
+                            Image(systemName: (playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying)
+                                  ? "pause.circle.fill"
+                                  : "play.circle.fill")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.green)
                         }
-                        .buttonStyle(.plain)
-                        .contentShape(Rectangle())
                     }
+
 
                     Button {
                         let wasLiked = albumDetailVM.likedTracks.contains(track.id)
@@ -123,10 +126,11 @@ struct PlayableTrackRowDeezer: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onTapGesture {
-            playlistPlayerVM.setPlaylist(trackList)
-            playlistPlayerVM.playTrack(at: currentIndex)
+            playlistPlayerVM.setPlaylist(trackList)  // imposta la lista globale
+            playlistPlayerVM.setCurrentTrack(at: currentIndex)
             showingPlayer = true
         }
+
         .fullScreenCover(isPresented: $showingPlayer) {
             MusicPlayerView(
                 trackList: trackList,
