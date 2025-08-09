@@ -91,7 +91,7 @@ struct PlayableTrackRowDeezer: View {
                                 playlistPlayerVM.togglePlayPause()
                             } else {
                                 albumDetailVM.stopPlayback()
-                                playlistPlayerVM.setPlaylist(trackList) // assicura che sia settata
+                                playlistPlayerVM.setPlaylist(trackList)
                                 playlistPlayerVM.playTrack(at: currentIndex)
                             }
                         } label: {
@@ -126,7 +126,7 @@ struct PlayableTrackRowDeezer: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onTapGesture {
-            playlistPlayerVM.setPlaylist(trackList)  // imposta la lista globale
+            playlistPlayerVM.setPlaylist(trackList)
             playlistPlayerVM.setCurrentTrack(at: currentIndex)
             showingPlayer = true
         }
