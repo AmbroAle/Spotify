@@ -3,7 +3,7 @@ import SwiftUI
 struct AlbumDetailView: View {
     let album: Album
     @StateObject private var viewModel = AlbumDetailViewModel()
-    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
 

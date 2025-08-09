@@ -6,7 +6,7 @@ struct CountryChartView: View {
     @StateObject private var viewModelTrack = AlbumDetailViewModel()
     @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
 
     var body: some View {
         VStack {
@@ -18,7 +18,6 @@ struct CountryChartView: View {
                         currentIndex: index,
                         albumCoverURL: track.cover_medium ?? "",
                         albumDetailVM: viewModelTrack,
-                        playlistPlayerVM: playlistPlayerVM
                     )
                     .buttonStyle(.plain)
                 }
@@ -66,7 +65,7 @@ struct PlayableTrackRowDeezer: View {
     let currentIndex: Int
     let albumCoverURL: String
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
-    @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @EnvironmentObject var notificationManager: NotificationManager
     @State private var showingPlayer = false
 
@@ -107,7 +106,6 @@ struct PlayableTrackRowDeezer: View {
                         let wasLiked = albumDetailVM.likedTracks.contains(track.id)
                         albumDetailVM.toggleLike(for: track)
 
-                        // Notifica
                         showLikeNotification(for: track, wasLiked: wasLiked)
                     } label: {
                         Image(systemName: albumDetailVM.likedTracks.contains(track.id) ? "heart.fill" : "heart")
@@ -133,9 +131,8 @@ struct PlayableTrackRowDeezer: View {
             MusicPlayerView(
                 trackList: trackList,
                 albumCoverURL: albumCoverURL,
-                playlistPlayerVM: playlistPlayerVM,
                 albumDetailVM: albumDetailVM
-            )
+            ).environmentObject(playlistPlayerVM)
         }
     }
     

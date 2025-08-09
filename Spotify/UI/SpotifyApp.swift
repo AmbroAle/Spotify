@@ -23,6 +23,7 @@ struct SpotifyApp: App {
     @StateObject var appViewModel = AppViewModel()
     @StateObject private var notificationManager = NotificationManager.shared
     @StateObject private var profileVM = ProfileViewModel()
+    @StateObject var playlistPlayerVM = PlaylistPlayerViewModel()
 
     var body: some Scene {
         WindowGroup {
@@ -30,6 +31,7 @@ struct SpotifyApp: App {
                 .environmentObject(notificationManager)
                 .environmentObject(appViewModel)
                 .environmentObject(profileVM)
+                .environmentObject(playlistPlayerVM) 
                 .preferredColorScheme(.dark)
         }
     }

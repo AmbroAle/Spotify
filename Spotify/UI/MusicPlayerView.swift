@@ -10,7 +10,7 @@ import Foundation
 struct MusicPlayerView: View {
     let trackList: [TrackAlbumDetail]
     let albumCoverURL: String
-    @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var isLiked: Bool = false
@@ -265,9 +265,10 @@ struct PlayableTrackRow: View {
             MusicPlayerView(
                 trackList: trackList,
                 albumCoverURL: albumCoverURL,
-                playlistPlayerVM: playlistPlayerVM,
                 albumDetailVM: albumDetailVM
             )
+            .environmentObject(playlistPlayerVM)
+
         }
     }
     
