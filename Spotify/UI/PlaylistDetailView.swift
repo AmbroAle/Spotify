@@ -98,10 +98,16 @@ struct PlaylistDetailView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             playlistPlayerVM.setPlaylist(viewModel.tracks)
-                            playlistPlayerVM.setCurrentTrack(at: index)
-                            selectedIndex = index
-                            showingPlayer = true
+                            if playlistPlayerVM.currentlyPlayingTrackID == viewModel.tracks[index].id {
+                                showingPlayer = true
+                            } else {
+                                playlistPlayerVM.playTrack(at: index)
+                                selectedIndex = index
+                                showingPlayer = true
+                            }
                         }
+
+
 
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {

@@ -163,8 +163,6 @@ struct MusicPlayerView: View {
     }
     
     private func setupInitialStateIfNeeded() {
-        // Solo imposta la playlist se non c'è nessuna traccia corrente
-        // E solo se il player non è già in riproduzione
         if playlistPlayerVM.currentTrack == nil && !playlistPlayerVM.isPlaying {
             playlistPlayerVM.setPlaylist(trackList)
         }
@@ -265,10 +263,8 @@ struct PlayableTrackRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             if playlistPlayerVM.currentlyPlayingTrackID == track.id {
-                // Stesso brano → solo apri player
                 showingMusicPlayer = true
             } else {
-                // Brano diverso → carica e suona
                 playlistPlayerVM.setPlaylist(trackList)
                 playlistPlayerVM.playTrack(at: currentIndex)
                 showingMusicPlayer = true
