@@ -21,7 +21,6 @@ struct PlaylistDetailView: View {
 
     var body: some View {
         VStack {
-            // Header
             HStack(spacing: 16) {
                 if let url = viewModel.playlistCoverURL {
                     AsyncImage(url: url) { image in
@@ -172,6 +171,9 @@ struct PlaylistDetailView: View {
             if let track = trackToDelete {
                 Text("“\(track.title)” sarà rimossa dalla playlist.")
             }
+        }
+        .onDisappear {
+            playlistPlayerVM.stopPlayback()
         }
     }
     private func playPauseAction() {
