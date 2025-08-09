@@ -2,8 +2,8 @@ import SwiftUI
 
 struct TrackPlaylistRowView: View {
     let track: TrackAlbumDetail
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
-    @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
     @EnvironmentObject var notificationManager: NotificationManager
 
     var body: some View {
@@ -17,28 +17,35 @@ struct TrackPlaylistRowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(track.title).font(.headline)
-                Text(track.artistName).font(.caption)
+                Text(track.title)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Text(track.artistName)
+                    .font(.caption)
 
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
-                        Button(action: {
-                            playlistPlayerVM.stopPlayback()
-                            albumDetailVM.playOrPause(track: track)
-                        }) {
-                            Image(systemName: albumDetailVM.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
+                        Button {
+                            if playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying {
+                                playlistPlayerVM.togglePlayPause()
+                            } else {
+                                playlistPlayerVM.setPlaylist([track])
+                                playlistPlayerVM.playTrack(at: 0)
+                            }
+                        } label: {
+                            Image(systemName: playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.green)
                         }
                     }
 
-                    Button(action: {
+                    Button {
                         let wasLiked = albumDetailVM.likedTracks.contains(track.id)
                         albumDetailVM.toggleLike(for: track)
                         showLikeNotification(for: track, wasLiked: wasLiked)
-
-                    }) {
+                    } label: {
                         Image(systemName: albumDetailVM.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                             .resizable()
                             .frame(width: 20, height: 20)
@@ -50,17 +57,18 @@ struct TrackPlaylistRowView: View {
             Spacer()
         }
         .padding(.vertical, 6)
-        .background(albumDetailVM.currentlyPlayingTrackID == track.id ? Color.green.opacity(0.1) : Color.clear)
+        .background(playlistPlayerVM.currentlyPlayingTrackID == track.id ? Color.green.opacity(0.1) : Color.clear)
         .cornerRadius(10)
     }
+
     private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
         let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
         guard inAppEnabled else { return }
-                
+
         let message = wasLiked
             ? "\"\(track.title)\" rimosso dai preferiti"
             : "\"\(track.title)\" aggiunto ai preferiti"
-            
+
         notificationManager.show(message: message)
     }
 }

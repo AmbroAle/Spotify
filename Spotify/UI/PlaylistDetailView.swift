@@ -4,7 +4,7 @@ struct PlaylistDetailView: View {
     @State var playlist: Playlist
     @StateObject private var viewModel = PlaylistDetailViewModel()
     @StateObject private var albumDetailVM = AlbumDetailViewModel()
-    @StateObject private var playlistPlayerVM = PlaylistPlayerViewModel()
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @EnvironmentObject var notificationManager: NotificationManager
 
     @State private var showAddTrackSheet = false
@@ -14,6 +14,8 @@ struct PlaylistDetailView: View {
     @State private var newPlaylistName = ""
     @State private var trackToDelete: TrackAlbumDetail?
     @State private var showDeleteConfirmation = false
+    @State private var showingPlayer = false
+    @State private var selectedIndex = 0
 
     private let carouselTabs = ["Consigliati", "Piaciuti", "Recenti"]
 
@@ -42,21 +44,10 @@ struct PlaylistDetailView: View {
                         .font(.title)
                         .bold()
 
-                    Button(action: {
-                        albumDetailVM.stopPlayback()
-                        if playlistPlayerVM.currentlyPlayingTrackID == nil {
-                            playlistPlayerVM.setPlaylist(viewModel.tracks)
-                            playlistPlayerVM.playPlaylist()
-                        } else {
-                            playlistPlayerVM.togglePlayPause()
-                        }
-                    }) {
-                        Label(
-                            playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "Play Playlist" : "Pause Playlist",
-                            systemImage: playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "play.circle" : "pause.circle"
-                        )
-                        .font(.title3)
-                        .foregroundColor(.green)
+                    Button(action: playPauseAction) {
+                        Label(playPauseLabel, systemImage: playPauseIcon)
+                            .font(.title3)
+                            .foregroundColor(.green)
                     }
                 }
 
@@ -100,12 +91,19 @@ struct PlaylistDetailView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach(viewModel.tracks) { track in
+                    ForEach(Array(viewModel.tracks.enumerated()), id: \.element.id) { index, track in
                         TrackPlaylistRowView(
                             track: track,
                             albumDetailVM: albumDetailVM,
-                            playlistPlayerVM: playlistPlayerVM
                         )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            playlistPlayerVM.setPlaylist(viewModel.tracks)
+                            playlistPlayerVM.setCurrentTrack(at: index)
+                            selectedIndex = index
+                            showingPlayer = true
+                        }
+
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
@@ -117,6 +115,15 @@ struct PlaylistDetailView: View {
                         }
                     }
                 }
+                .fullScreenCover(isPresented: $showingPlayer) {
+                    MusicPlayerView(
+                        trackList: viewModel.tracks,
+                        albumCoverURL: viewModel.playlistCoverURL?.absoluteString ?? "",
+                        albumDetailVM: albumDetailVM
+                    )
+                    .environmentObject(playlistPlayerVM)
+                }
+
             }
         }
         .navigationTitle("Playlist")
@@ -166,5 +173,22 @@ struct PlaylistDetailView: View {
                 Text("“\(track.title)” sarà rimossa dalla playlist.")
             }
         }
+    }
+    private func playPauseAction() {
+        albumDetailVM.stopPlayback()
+        if playlistPlayerVM.currentlyPlayingTrackID == nil {
+            playlistPlayerVM.setPlaylist(viewModel.tracks)
+            playlistPlayerVM.playPlaylist()
+        } else {
+            playlistPlayerVM.togglePlayPause()
+        }
+    }
+
+    private var playPauseLabel: String {
+        playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "Play Playlist" : "Pause Playlist"
+    }
+
+    private var playPauseIcon: String {
+        playlistPlayerVM.isPaused || playlistPlayerVM.currentlyPlayingTrackID == nil ? "play.circle" : "pause.circle"
     }
 }
