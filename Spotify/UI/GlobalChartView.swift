@@ -5,16 +5,21 @@ struct GlobalChartView: View {
     @StateObject private var viewModelTrack = AlbumDetailViewModel()
     @EnvironmentObject var notificationManager: NotificationManager
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
+    @State private var showingPlayer = false
+    @State private var selectedIndex = 0
 
     var body: some View {
         VStack {
-            List(viewModel.deezerTracks) { track in
+            List(Array(viewModel.deezerTracks.enumerated()), id: \.element.id) { index, track in
                 HStack(spacing: 12) {
-                    Image("spotify-top-50-global")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    AsyncImage(url: URL(string: track.cover_medium ?? "")) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Color.gray
+                    }
+                    .frame(width: 60, height: 60)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(track.title)
@@ -23,32 +28,37 @@ struct GlobalChartView: View {
 
                         HStack(spacing: 16) {
                             if !track.preview.isEmpty {
-                                Button(action: {
-                                    viewModelTrack.playOrPause(track: track)
-                                    if viewModelTrack.currentlyPlayingTrackID != track.id {
-                                        viewModelTrack.saveRecentTrack(track)
+                                Button {
+                                    if playlistPlayerVM.currentlyPlayingTrackID == track.id {
+                                        playlistPlayerVM.togglePlayPause()
+                                    } else {
+                                        viewModelTrack.stopPlayback()
+                                        playlistPlayerVM.setPlaylist(viewModel.deezerTracks)
+                                        playlistPlayerVM.playTrack(at: index)
                                     }
-                                }) {
-                                    Image(systemName: viewModelTrack.currentlyPlayingTrackID == track.id ? "pause.circle.fill" : "play.circle.fill")
+                                } label: {
+                                    Image(systemName: (playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying)
+                                          ? "pause.circle.fill"
+                                          : "play.circle.fill")
                                         .resizable()
                                         .frame(width: 24, height: 24)
                                         .foregroundColor(.green)
                                 }
-                                .buttonStyle(PlainButtonStyle())
+                                .buttonStyle(.plain)
                                 .contentShape(Rectangle())
                             }
 
-                            Button(action: {
+                            Button {
                                 let wasLiked = viewModelTrack.likedTracks.contains(track.id)
                                 viewModelTrack.toggleLike(for: track)
                                 showLikeNotification(for: track, wasLiked: wasLiked)
-                            }) {
+                            } label: {
                                 Image(systemName: viewModelTrack.likedTracks.contains(track.id) ? "heart.fill" : "heart")
                                     .resizable()
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.green)
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .buttonStyle(.plain)
                             .contentShape(Rectangle())
                         }
                     }
@@ -56,7 +66,12 @@ struct GlobalChartView: View {
                 }
                 .padding(.vertical, 6)
                 .contentShape(Rectangle())
-                .onTapGesture {}
+                .onTapGesture {
+                    playlistPlayerVM.setPlaylist(viewModel.deezerTracks)
+                    playlistPlayerVM.setCurrentTrack(at: index)
+                    selectedIndex = index
+                    showingPlayer = true
+                }
             }
             .listStyle(.plain)
             .listRowSeparator(.hidden)
@@ -70,17 +85,26 @@ struct GlobalChartView: View {
         .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
+                Button {
                     viewModelTrack.stopPlayback()
+                    playlistPlayerVM.stopPlayback()
                     dismiss()
-                }) {
+                } label: {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.blue)
                 }
             }
         }
+        .fullScreenCover(isPresented: $showingPlayer) {
+            MusicPlayerView(
+                trackList: viewModel.deezerTracks,
+                albumCoverURL: "spotify-top-50-global",
+                albumDetailVM: viewModelTrack
+            )
+            .environmentObject(playlistPlayerVM)
+        }
     }
-    
+
     private func showLikeNotification(for track: TrackAlbumDetail, wasLiked: Bool) {
         let inAppEnabled = UserDefaults.standard.bool(forKey: "inAppNotificationsEnabled")
         guard inAppEnabled else { return }
