@@ -3,6 +3,7 @@ import SwiftUI
 struct LikedTracksView: View {
     @StateObject private var viewModel = AlbumDetailViewModel()
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -13,11 +14,13 @@ struct LikedTracksView: View {
                     .padding()
             } else {
                 List {
-                    ForEach(viewModel.tracks) { track in
-                        TrackRowView(
+                    ForEach(Array(viewModel.tracks.enumerated()), id: \.element.id) { index, track in
+                        PlayableTrackRow(
                             track: track,
+                            trackList: viewModel.tracks,
+                            currentIndex: index,
                             albumCoverURL: track.cover_medium ?? "",
-                            viewModel: viewModel
+                            albumDetailVM: viewModel
                         )
                         .buttonStyle(.plain)
                     }
@@ -29,6 +32,7 @@ struct LikedTracksView: View {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button(action: {
                             viewModel.stopPlayback()
+                            playlistPlayerVM.stopPlayback()
                             dismiss()
                         }) {
                             Image(systemName: "chevron.left")

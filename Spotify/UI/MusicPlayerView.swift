@@ -1,9 +1,3 @@
-//
-//  MusicPlayerView.swift
-//  Spotify
-//
-//  Created by Alex Frisoni on 07/08/25.
-//
 import SwiftUI
 import Foundation
 
@@ -15,8 +9,8 @@ struct MusicPlayerView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isLiked: Bool = false
     
-    private var currentTrack: TrackAlbumDetail {
-        playlistPlayerVM.currentTrack!
+    private var currentTrack: TrackAlbumDetail? {
+        playlistPlayerVM.currentTrack
     }
     
     private var currentIndex: Int {
@@ -32,7 +26,8 @@ struct MusicPlayerView: View {
     }
     
     private var isCurrentlyPlaying: Bool {
-        playlistPlayerVM.currentlyPlayingTrackID == currentTrack.id && playlistPlayerVM.isPlaying
+        guard let track = currentTrack else { return false }
+        return playlistPlayerVM.currentlyPlayingTrackID == track.id && playlistPlayerVM.isPlaying
     }
     
     var body: some View {
@@ -67,19 +62,24 @@ struct MusicPlayerView: View {
                 
                 Spacer()
                 
-                VStack(spacing: 8) {
-                    Text(currentTrack.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(currentTrack.artistName)
-                        .font(.body)
+                if let track = currentTrack {
+                    VStack(spacing: 8) {
+                        Text(track.title)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                        
+                        Text(track.artistName)
+                            .font(.body)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal)
+                } else {
+                    Text("Nessuna traccia in riproduzione")
                         .foregroundColor(.gray)
                 }
-                .padding(.horizontal)
                 
                 Spacer()
                 
@@ -116,7 +116,7 @@ struct MusicPlayerView: View {
                         .disabled(!hasNext)
                     }
                     
-                    if !currentTrack.preview.isEmpty {
+                    if let track = currentTrack, !track.preview.isEmpty {
                         Text("Preview - 30 secondi")
                             .font(.caption)
                             .foregroundColor(.gray)
@@ -128,7 +128,7 @@ struct MusicPlayerView: View {
         }
         .onAppear {
             checkIfLiked()
-            setupInitialState()
+            setupInitialStateIfNeeded()
         }
         .onChange(of: currentIndex) {
             checkIfLiked()
@@ -137,7 +137,7 @@ struct MusicPlayerView: View {
     
     @ViewBuilder
     private var albumCoverView: some View {
-        let coverString = currentTrack.cover_medium ?? albumCoverURL
+        let coverString = currentTrack?.cover_medium ?? albumCoverURL
         if let url = URL(string: coverString) {
             AsyncImage(url: url) { image in
                 image
@@ -162,13 +162,17 @@ struct MusicPlayerView: View {
         }
     }
     
-    private func setupInitialState() {
-        playlistPlayerVM.setPlaylist(trackList)
+    private func setupInitialStateIfNeeded() {
+        // Solo imposta la playlist se non c'è nessuna traccia corrente
+        // E solo se il player non è già in riproduzione
+        if playlistPlayerVM.currentTrack == nil && !playlistPlayerVM.isPlaying {
+            playlistPlayerVM.setPlaylist(trackList)
+        }
     }
     
     private func togglePlayPause() {
         playlistPlayerVM.togglePlayPause()
-                if playlistPlayerVM.isPlaying {
+        if playlistPlayerVM.isPlaying {
             albumDetailVM.stopPlayback()
         }
     }
@@ -184,12 +188,15 @@ struct MusicPlayerView: View {
     }
     
     private func toggleLike() {
+        guard let track = currentTrack else { return }
         isLiked.toggle()
-        albumDetailVM.toggleLike(for: currentTrack)
+        albumDetailVM.toggleLike(for: track)
     }
     
     private func checkIfLiked() {
-        isLiked = albumDetailVM.likedTracks.contains(currentTrack.id)
+        if let track = currentTrack {
+            isLiked = albumDetailVM.likedTracks.contains(track.id)
+        }
     }
 }
 
@@ -224,12 +231,11 @@ struct PlayableTrackRow: View {
                 HStack(spacing: 12) {
                     if !track.preview.isEmpty {
                         Button(action: {
-
                             if playlistPlayerVM.currentlyPlayingTrackID == track.id {
                                 playlistPlayerVM.togglePlayPause()
                             } else {
                                 albumDetailVM.stopPlayback()
-                                playlistPlayerVM.setCurrentTrack(at: currentIndex)
+                                playlistPlayerVM.setPlaylist(trackList)
                                 playlistPlayerVM.playTrack(at: currentIndex)
                             }
                         }) {
@@ -258,8 +264,15 @@ struct PlayableTrackRow: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onTapGesture {
-            playlistPlayerVM.setCurrentTrack(at: currentIndex)
-            showingMusicPlayer = true
+            if playlistPlayerVM.currentlyPlayingTrackID == track.id {
+                // Stesso brano → solo apri player
+                showingMusicPlayer = true
+            } else {
+                // Brano diverso → carica e suona
+                playlistPlayerVM.setPlaylist(trackList)
+                playlistPlayerVM.playTrack(at: currentIndex)
+                showingMusicPlayer = true
+            }
         }
         .fullScreenCover(isPresented: $showingMusicPlayer) {
             MusicPlayerView(
@@ -268,7 +281,6 @@ struct PlayableTrackRow: View {
                 albumDetailVM: albumDetailVM
             )
             .environmentObject(playlistPlayerVM)
-
         }
     }
     
