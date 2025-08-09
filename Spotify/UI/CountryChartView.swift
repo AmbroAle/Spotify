@@ -39,7 +39,9 @@ struct CountryChartView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
                     viewModelTrack.stopPlayback()
+                    playlistPlayerVM.stopPlayback()
                     dismiss()
+
                 }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.blue)
