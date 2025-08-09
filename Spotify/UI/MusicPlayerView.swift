@@ -199,7 +199,7 @@ struct PlayableTrackRow: View {
     let currentIndex: Int
     let albumCoverURL: String
     @ObservedObject var albumDetailVM: AlbumDetailViewModel
-    @ObservedObject var playlistPlayerVM: PlaylistPlayerViewModel
+    @EnvironmentObject var playlistPlayerVM: PlaylistPlayerViewModel
     @EnvironmentObject var notificationManager: NotificationManager
     @State private var showingMusicPlayer = false
     
