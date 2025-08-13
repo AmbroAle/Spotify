@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>L&apos;app ha bisogno di accedere alla fotocamera per scattare foto del profilo</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Usiamo Face ID per proteggere l’accesso alla modifica della password</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
