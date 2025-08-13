@@ -43,11 +43,6 @@ struct PlaylistDetailView: View {
                         .font(.title)
                         .bold()
 
-                    Button(action: playPauseAction) {
-                        Label(playPauseLabel, systemImage: playPauseIcon)
-                            .font(.title3)
-                            .foregroundColor(.green)
-                    }
                 }
 
                 Spacer()
